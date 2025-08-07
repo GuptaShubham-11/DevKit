@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 :root {
   /* Light mode colors (fallback) */
@@ -7,17 +7,17 @@
 
   /* Black Theme Color Variables */
   --bg-primary: #000000;
-  --bg-secondary: #0A0A0A;
-  --surface-primary: #1A1A1A;
-  --surface-secondary: #2A2A2A;
+  --bg-secondary: #0a0a0a;
+  --surface-primary: #1a1a1a;
+  --surface-secondary: #2a2a2a;
 
-  --text-primary: #FFFFFF;
-  --text-secondary: #CCCCCC;
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
   --text-muted: #888888;
 
-  --accent-primary: #3B82F6;
-  --accent-success: #22C55E;
-  --accent-warning: #F59E0B;
+  --accent-primary: #3b82f6;
+  --accent-success: #22c55e;
+  --accent-warning: #f59e0b;
 
   /* Additional utility colors */
   --border-color: rgba(255, 255, 255, 0.1);
@@ -79,10 +79,18 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    var(--font-sans),
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
 
   /* Smooth transitions for theme changes */
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 }
 
 /* Utility classes for your color palette */
@@ -152,7 +160,7 @@ body {
 }
 
 .text-optimized {
-  color: #FAFAFA;
+  color: #fafafa;
 }
 
 /* Card component example */
@@ -219,7 +227,8 @@ body {
   border: 1px solid var(--surface-secondary);
   border-radius: 8px;
   padding: 1rem;
-  font-family: var(--font-mono), 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+  font-family:
+    var(--font-mono), 'JetBrains Mono', 'SF Mono', Consolas, monospace;
   color: var(--text-secondary);
   font-size: 0.875rem;
   line-height: 1.5;
