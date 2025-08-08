@@ -9,6 +9,8 @@ export interface IUser {
   profileImage?: string;
   subscriptions: string;
   isVerified: boolean;
+  otp?: string;
+  otpExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +46,12 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    otp: {
+      type: String,
+    },
+    otpExpiry: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );
@@ -54,5 +62,11 @@ userSchema.pre('save', async function (next) {
   }
   next();
 });
+
+userSchema.methods.isPasswordCorrect = async function (
+  password: string
+): Promise<boolean> {
+  return await bcrypt.compare(password, this.password);
+};
 
 export const User = models?.User || model<IUser>('User', userSchema);
