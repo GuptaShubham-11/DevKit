@@ -24,10 +24,7 @@ export async function PUT(request: NextRequest) {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found!' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'User not found!' }, { status: 404 });
     }
 
     // Check OTP expiry first for better security response
@@ -40,10 +37,7 @@ export async function PUT(request: NextRequest) {
 
     // Check if OTP matches exactly (case sensitive)
     if (user.otp !== otp) {
-      return NextResponse.json(
-        { error: 'Invalid OTP!' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Invalid OTP!' }, { status: 400 });
     }
 
     // Hash new password securely before saving
@@ -60,7 +54,6 @@ export async function PUT(request: NextRequest) {
       { message: 'Password reset successfully.' },
       { status: 200 }
     );
-
   } catch (error) {
     console.error('Error resetting password:', error);
     return NextResponse.json(

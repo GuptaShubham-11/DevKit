@@ -10,15 +10,19 @@ export async function GET() {
 
     const generatedUsernames: string[] | null = await generateUsername();
 
-    if (!generatedUsernames || !Array.isArray(generatedUsernames) || generatedUsernames.length === 0) {
+    if (
+      !generatedUsernames ||
+      !Array.isArray(generatedUsernames) ||
+      generatedUsernames.length === 0
+    ) {
       return NextResponse.json(
         { error: 'Failed to generate usernames!' },
         { status: 500 }
       );
     }
 
-    const validUsernames = generatedUsernames.filter((uname) =>
-      usernameSchema.safeParse({ username: uname }).success
+    const validUsernames = generatedUsernames.filter(
+      (uname) => usernameSchema.safeParse({ username: uname }).success
     );
 
     if (validUsernames.length === 0) {
@@ -33,10 +37,14 @@ export async function GET() {
     }).select('username');
 
     // Extract existing usernames for quick lookup
-    const existingUsernamesSet = new Set(existingUsers.map((user) => user.username));
+    const existingUsernamesSet = new Set(
+      existingUsers.map((user) => user.username)
+    );
 
     // Filter out usernames that already exist
-    const availableUsernames = validUsernames.filter((uname) => !existingUsernamesSet.has(uname));
+    const availableUsernames = validUsernames.filter(
+      (uname) => !existingUsernamesSet.has(uname)
+    );
 
     if (availableUsernames.length === 0) {
       return NextResponse.json(

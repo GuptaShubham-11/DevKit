@@ -41,7 +41,6 @@ export async function GET(request: NextRequest) {
       { message: 'Username available.' },
       { status: 200 }
     );
-
   } catch (error) {
     console.error('Error checking username', error);
     return NextResponse.json(

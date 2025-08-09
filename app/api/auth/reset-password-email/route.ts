@@ -25,7 +25,10 @@ export async function PATCH(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json(
-        { message: 'If an account with that email exists, an OTP has been sent.' },
+        {
+          message:
+            'If an account with that email exists, an OTP has been sent.',
+        },
         { status: 200 }
       );
     }
@@ -47,7 +50,9 @@ export async function PATCH(request: NextRequest) {
     });
 
     return NextResponse.json(
-      { message: 'If an account with that email exists, an OTP has been sent.' },
+      {
+        message: 'If an account with that email exists, an OTP has been sent.',
+      },
       { status: 200 }
     );
   } catch (error) {

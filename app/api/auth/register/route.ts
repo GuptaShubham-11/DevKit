@@ -33,7 +33,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const otp = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+    const otp = Math.floor(Math.random() * 1000000)
+      .toString()
+      .padStart(6, '0');
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
     // User exists, but is not verified
