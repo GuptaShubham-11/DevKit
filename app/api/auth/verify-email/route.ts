@@ -10,9 +10,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!validatedData.success) {
       return NextResponse.json(
-        {
-          error: validatedData.error.issues[0].message,
-        },
+        { error: validatedData.error.issues[0].message },
         { status: 400 }
       );
     }
@@ -27,29 +25,40 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'User not found!' }, { status: 404 });
     }
 
-    if (!user.isVerified) {
-      if (user.otp === otp && user.otpExpiry > new Date()) {
-        user.isVerified = true;
-        await user.save();
-        return NextResponse.json(
-          { message: 'Email verified.' },
-          { status: 200 }
-        );
-      } else if (user.otpExpiry < new Date()) {
-        return NextResponse.json({ error: 'OTP expired!' }, { status: 400 });
-      } else {
-        return NextResponse.json({ error: 'Invalid OTP!' }, { status: 400 });
-      }
+    if (user.isVerified) {
+      return NextResponse.json(
+        { message: 'Email already verified!' },
+        { status: 200 }
+      );
     }
 
+    // Validate OTP expiry and OTP match
+    const now = new Date();
+    if (!user.otp || !user.otpExpiry || user.otpExpiry < now) {
+      return NextResponse.json(
+        { error: 'OTP expired or invalid, please request a new code.' },
+        { status: 400 }
+      );
+    }
+
+    if (user.otp !== otp) {
+      return NextResponse.json({ error: 'Invalid OTP!' }, { status: 400 });
+    }
+
+    // Mark user as verified and clear OTP fields
+    user.isVerified = true;
+    user.otp = null;
+    user.otpExpiry = null;
+    await user.save();
+
     return NextResponse.json(
-      { message: 'Email already verified!' },
+      { message: 'Email verified successfully.' },
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error verifying email', error);
+    console.error('Error verifying email:', error);
     return NextResponse.json(
-      { error: 'Verification failed!' },
+      { error: 'Verification failed due to server error.' },
       { status: 500 }
     );
   }

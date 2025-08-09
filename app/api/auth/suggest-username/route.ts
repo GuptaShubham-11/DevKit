@@ -7,26 +7,46 @@ import { generateUsername } from '@/lib/generateUsername';
 export async function GET() {
   try {
     await connectToDatabase();
-    const generatedUsername = await generateUsername();
 
-    if (!generatedUsername) {
+    const generatedUsernames: string[] | null = await generateUsername();
+
+    if (!generatedUsernames || !Array.isArray(generatedUsernames) || generatedUsernames.length === 0) {
       return NextResponse.json(
-        { error: 'Generating username failed!' },
+        { error: 'Failed to generate usernames!' },
         { status: 500 }
       );
     }
 
-    let usernames = [];
+    const validUsernames = generatedUsernames.filter((uname) =>
+      usernameSchema.safeParse({ username: uname }).success
+    );
 
-    for (const username of generatedUsername) {
-      const existingUser = await User.findOne({ username });
-      if (!existingUser && usernameSchema.safeParse({ username }).success) {
-        usernames.push(username);
-      }
+    if (validUsernames.length === 0) {
+      return NextResponse.json(
+        { error: 'No valid usernames generated!' },
+        { status: 500 }
+      );
+    }
+
+    const existingUsers = await User.find({
+      username: { $in: validUsernames },
+    }).select('username');
+
+    // Extract existing usernames for quick lookup
+    const existingUsernamesSet = new Set(existingUsers.map((user) => user.username));
+
+    // Filter out usernames that already exist
+    const availableUsernames = validUsernames.filter((uname) => !existingUsernamesSet.has(uname));
+
+    if (availableUsernames.length === 0) {
+      return NextResponse.json(
+        { error: 'No available usernames found!' },
+        { status: 409 } // Conflict
+      );
     }
 
     return NextResponse.json(
-      { message: 'Generated username.', usernames },
+      { usernames: availableUsernames },
       { status: 200 }
     );
   } catch (error) {

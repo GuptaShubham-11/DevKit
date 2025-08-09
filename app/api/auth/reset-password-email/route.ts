@@ -12,9 +12,7 @@ export async function PATCH(request: NextRequest) {
 
     if (!validatedData.success) {
       return NextResponse.json(
-        {
-          error: validatedData.error.issues[0].message,
-        },
+        { error: validatedData.error.issues[0].message },
         { status: 400 }
       );
     }
@@ -26,29 +24,36 @@ export async function PATCH(request: NextRequest) {
     const user = await User.findOne({ email });
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found!' }, { status: 404 });
+      return NextResponse.json(
+        { message: 'If an account with that email exists, an OTP has been sent.' },
+        { status: 200 }
+      );
     }
 
-    user.otp = Math.floor(Math.random() * 1000000)
+    // Generate a secure OTP
+    const otp = Math.floor(Math.random() * 1000000)
       .toString()
-      .padStart(6, '0'); // Generate a random 6-digit OTP
-    user.otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // Set OTP expiry to 15 minutes from now
+      .padStart(6, '0');
+
+    // Save OTP and expiration
+    user.otp = otp;
+    user.otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes expiry
     await user.save({ validateBeforeSave: false });
 
     await sendEmail({
       emailAddress: email,
-      emailSubject: 'DEVKIT - Otp For Reset Password',
-      htmlText: resetPasswordHtml(user.otp),
+      emailSubject: 'DEVKIT - OTP for Password Reset',
+      htmlText: resetPasswordHtml(otp),
     });
 
     return NextResponse.json(
-      { message: 'OTP sent successfully.' },
+      { message: 'If an account with that email exists, an OTP has been sent.' },
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error forgot password', error);
+    console.error('Error during forgot password process:', error);
     return NextResponse.json(
-      { error: 'Forgot password failed!' },
+      { error: 'Forgot password process failed!' },
       { status: 500 }
     );
   }

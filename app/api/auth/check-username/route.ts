@@ -5,19 +5,26 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const reqData = await request.json();
-    const validatedData = usernameSchema.safeParse(reqData);
+    const { searchParams } = new URL(request.url);
+    const usernameParam = searchParams.get('username');
 
-    if (!validatedData.success) {
+    if (!usernameParam) {
       return NextResponse.json(
-        {
-          error: validatedData.error.issues[0].message,
-        },
+        { error: 'Username query parameter is required.' },
         { status: 400 }
       );
     }
 
-    const { username } = validatedData.data;
+    const validatedData = usernameSchema.safeParse(usernameParam);
+
+    if (!validatedData.success) {
+      return NextResponse.json(
+        { error: validatedData.error.issues[0].message },
+        { status: 400 }
+      );
+    }
+
+    const username = validatedData.data;
 
     await connectToDatabase();
 
@@ -26,13 +33,15 @@ export async function GET(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: 'Username already exists!' },
-        { status: 400 }
+        { status: 409 } // 409 Conflict is more semantically correct here
       );
     }
+
     return NextResponse.json(
       { message: 'Username available.' },
       { status: 200 }
     );
+
   } catch (error) {
     console.error('Error checking username', error);
     return NextResponse.json(
