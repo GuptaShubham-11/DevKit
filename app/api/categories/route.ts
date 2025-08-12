@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
-import { Category } from '@/models/category';
+import { Category, ICategory } from '@/models/category';
 import { getCategoriesSchema } from '@/validation/category';
 
 export async function GET(request: NextRequest) {
@@ -27,7 +27,10 @@ export async function GET(request: NextRequest) {
     await connectToDatabase();
 
     // Build query conditions
-    const conditions: any = {};
+    const conditions: {
+      parentId?: string;
+      isActive?: boolean;
+    } = {};
 
     if (parentId) {
       conditions.parentId = parentId;
@@ -48,7 +51,7 @@ export async function GET(request: NextRequest) {
       query = query.populate('parentId', 'name slug');
     }
 
-    const categories = await query.exec();
+    const categories = (await query.exec()) as ICategory[];
 
     // Get total count for pagination
     const total = await Category.countDocuments(conditions);
@@ -84,14 +87,14 @@ export async function GET(request: NextRequest) {
 
 // Helper function to build category tree
 function buildCategoryTree(
-  categories: any[],
+  categories: ICategory[],
   parentId: string | null = null
-): any[] {
-  const tree: any[] = [];
+): ICategory[] {
+  const tree: ICategory[] = [];
 
   for (const category of categories) {
     if (String(category.parentId) === String(parentId)) {
-      const children = buildCategoryTree(categories, category._id);
+      const children = buildCategoryTree(categories, category._id.toString());
       const categoryObj = {
         ...category.toObject(),
         children: children.length > 0 ? children : undefined,
