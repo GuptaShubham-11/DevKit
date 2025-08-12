@@ -6,9 +6,20 @@ export interface IUser {
   email: string;
   username: string;
   password: string;
+  isAdmin: boolean;
   profileImage?: string;
-  subscriptions: string;
+  subscriptionTier: string;
   isVerified: boolean;
+  oAuth?: {
+    google?: {
+      id: string;
+      email: string;
+    };
+    profile?: {
+      name: string;
+      image: string;
+    };
+  }
   otp?: string;
   otpExpiry?: Date;
   createdAt: Date;
@@ -35,16 +46,24 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
     },
+    isAdmin: {
+      type: Boolean,
+      default: false,
+    },
     profileImage: {
       type: String,
     },
-    subscriptions: {
+    subscriptionTier: {
       type: String,
       default: 'free',
     },
     isVerified: {
       type: Boolean,
       default: false,
+    },
+    oAuth: {
+      type: Schema.Types.Mixed,
+      default: null,
     },
     otp: {
       type: String,
@@ -58,7 +77,11 @@ const userSchema = new Schema<IUser>(
 
 userSchema.pre('save', async function (next) {
   if (this.isModified('password')) {
-    this.password = await bcrypt.hash(this.password, 11);
+    const ROUNDS = Number(process.env.SALT_ROUNDS);
+    if (!ROUNDS) {
+      throw new Error('SALT_ROUNDS must be set!');
+    }
+    this.password = await bcrypt.hash(this.password, ROUNDS);
   }
   next();
 });

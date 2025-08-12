@@ -86,11 +86,11 @@ export const authOptions: NextAuthOptions = {
                   id: user.id,
                   email: user.email,
                 },
-              },
-              profile: {
-                name: user.name,
-                image: user.image,
-              },
+                profile: {
+                  name: user.name,
+                  image: user.image,
+                }
+              }
             });
 
             // Update user id to match database
