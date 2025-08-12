@@ -89,8 +89,8 @@ export const authOptions: NextAuthOptions = {
                 profile: {
                   name: user.name,
                   image: user.image,
-                }
-              }
+                },
+              },
             });
 
             // Update user id to match database
