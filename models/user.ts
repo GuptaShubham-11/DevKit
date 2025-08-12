@@ -19,7 +19,7 @@ export interface IUser {
       name: string;
       image: string;
     };
-  }
+  };
   otp?: string;
   otpExpiry?: Date;
   createdAt: Date;
