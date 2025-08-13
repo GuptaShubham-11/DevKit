@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { connectToDatabase } from '@/lib/db';
 import { AnalyticsDaily } from '@/models/analyticsDaily';
-import { UserActivity } from '@/models/userActivity';
+import { UserActivity } from '@/models/userActivities';
 import { GeneratedCommand } from '@/models/generatedCommand';
 import { Template } from '@/models/template';
-import { User } from '@/models/user';
 import { authOptions } from '@/lib/auth';
 import { getDailyAnalyticsSchema } from '@/validation/analyticsDaily';
+import { checkUserIsAdmin } from '@/lib/checkUserIsAdmin';
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,9 +22,7 @@ export async function GET(request: NextRequest) {
 
     await connectToDatabase();
 
-    // Check if user is admin or accessing their own data
-    const user = await User.findById(session.user.id).select('isAdmin');
-    const isAdmin = user?.isAdmin;
+    const isAdmin = await checkUserIsAdmin(session.user.id);
 
     const { searchParams } = new URL(request.url);
     const queryParams = Object.fromEntries(searchParams.entries());
@@ -194,7 +192,8 @@ export async function GET(request: NextRequest) {
           start: startingDate.toISOString(),
           end: endingDate.toISOString(),
           days: Math.ceil(
-            (endingDate.getTime() - startingDate.getTime()) / (1000 * 60 * 60 * 24)
+            (endingDate.getTime() - startingDate.getTime()) /
+            (1000 * 60 * 60 * 24)
           ),
           aggregateBy,
         },
