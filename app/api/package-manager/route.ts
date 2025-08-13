@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectToDatabase } from '@/lib/db';
 import { IPackageManager, PackageManager } from '@/models/packageManager';
-import {
-  getPackageManagersSchema,
-} from '@/validation/packageManager';
+import { getPackageManagersSchema } from '@/validation/packageManager';
 
 export async function GET(request: NextRequest) {
   try {
@@ -92,12 +90,12 @@ export async function GET(request: NextRequest) {
     });
 
     // Get platform distribution
-    const platformStats = await PackageManager.aggregate([
+    const platformStats = (await PackageManager.aggregate([
       { $match: conditions },
       { $unwind: '$supportedPlatforms' },
       { $group: { _id: '$supportedPlatforms', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
-    ]) as IPackageManager[];
+    ])) as IPackageManager[];
 
     return NextResponse.json(
       {

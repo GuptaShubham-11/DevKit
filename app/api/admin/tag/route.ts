@@ -49,7 +49,9 @@ export async function POST(request: NextRequest) {
     await connectToDatabase();
 
     // Check for existing tag (by name or slug)
-    const existingTag = await Tag.findOne({ $or: [{ name }, { slug }] }) as ITag;
+    const existingTag = (await Tag.findOne({
+      $or: [{ name }, { slug }],
+    })) as ITag;
     if (existingTag) {
       return NextResponse.json(
         { error: 'A tag with this name or slug already exists' },
@@ -57,14 +59,14 @@ export async function POST(request: NextRequest) {
       );
     }
     // Create and save tag
-    const newTag = await Tag.create({
+    const newTag = (await Tag.create({
       name,
       slug,
       description,
       color,
       category,
       isFeatured,
-    }) as ITag;
+    })) as ITag;
 
     return NextResponse.json(
       { message: 'Tag created successfully', tag: newTag },

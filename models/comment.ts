@@ -24,7 +24,7 @@ const commentchema = new Schema<IComment>(
     commentText: {
       type: String,
       maxlength: 2000,
-    }
+    },
   },
   { timestamps: true }
 );
