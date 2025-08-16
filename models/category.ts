@@ -9,6 +9,9 @@ export interface ICategory extends Document {
   icon?: string;
   sortOrder: number;
   isActive: boolean;
+  color: string;
+  featuredTemplates: mongoose.Types.ObjectId[];
+  clickCount: number;
   metadata: Record<string, any>;
   templateCount: number;
   createdAt: Date;
@@ -51,6 +54,20 @@ const categorySchema = new Schema<ICategory>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    color: {
+      type: String,
+      match: /^#([0-9A-F]{3}){1,2}$/i, // hex code
+    },
+    featuredTemplates: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Template',
+      },
+    ],
+    clickCount: {
+      type: Number,
+      default: 0,
     },
     metadata: {
       type: Schema.Types.Mixed,
