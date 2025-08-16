@@ -20,7 +20,7 @@ export interface IBadge extends Document {
     specialPrivileges?: string[];
   };
   isActive: boolean;
-  category: string;
+  category: 'general' | 'creator' | 'community' | 'usage' | 'milestone' | 'special' | 'seasonal' | 'achievement';
   createdAt: Date;
   updatedAt: Date;
   __v?: number;
@@ -51,10 +51,9 @@ const badgeSchema = new Schema<IBadge>(
         required: true,
         enum: [
           'templatesCreated',
-          'downloadsReceived',
+          'copiesReceived',
           'commandsGenerated',
           'likesReceived',
-          'reviewsWritten',
           'communityHelper',
         ],
       },

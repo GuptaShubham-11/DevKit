@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
       description,
       badgeImage,
       criteria,
+      isActive,
       pointsRequired = 0,
       rarityLevel = 'common',
       rewardData = {},
@@ -60,10 +61,10 @@ export async function POST(request: NextRequest) {
 
     // Validate rarity vs points required consistency
     const rarityPointsMap = {
-      common: { min: 0, max: 200 },
-      rare: { min: 100, max: 800 },
-      epic: { min: 500, max: 2000 },
-      legendary: { min: 1000, max: 10000 },
+      common: { min: 0, max: 300 },
+      rare: { min: 301, max: 800 },
+      epic: { min: 801, max: 4000 },
+      legendary: { min: 4001, max: 10000 },
     };
 
     const pointsRange = rarityPointsMap[rarityLevel];
@@ -82,10 +83,11 @@ export async function POST(request: NextRequest) {
       description,
       badgeImage,
       criteria,
+      isActive,
       pointsRequired,
       rarityLevel,
       rewardData,
-      category,
+      category
     });
 
     return NextResponse.json(

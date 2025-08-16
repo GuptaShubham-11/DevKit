@@ -54,29 +54,39 @@ export const createBadgeSchema = z.object({
         .string()
         .regex(/^\/badges\/.*\.(png|jpg|jpeg|svg)$/, 'Invalid badge image path')
     ),
-  criteria: z.object({
-    type: z.enum([
-      'templatesCreated',
-      'downloadsReceived',
-      'commandsGenerated',
-      'likesReceived',
-      'reviewsWritten',
-      'communityHelper',
-      'templatesFeatured',
-    ]),
-    condition: z.enum(['gte', 'lte', 'eq', 'between']),
-    value: z
-      .number()
-      .min(1, 'Criteria value must be at least 1')
-      .max(1000000, 'Criteria value too large'),
-    timeframe: z.enum(['allTime', '30Days', '7Days', '1Day']).optional(),
-    additionalConditions: z.record(z.string(), z.any()).optional(),
-  }),
+  criteria: z
+    .object({
+      type: z.enum([
+        'templatesCreated',
+        'copiesReceived',
+        'commandsGenerated',
+        'likesReceived',
+        'communityHelper'
+      ]),
+      condition: z.enum(['gte', 'lte', 'eq', 'between']),
+      value: z.number().min(1),
+      timeframe: z
+        .enum(['allTime', '30Days', '7Days', '1Day'])
+        .default('allTime'),
+      additionalConditions: z.record(z.string(), z.any()).optional(),
+    })
+    .refine(
+      (data) => {
+        if (
+          data.condition === 'between' &&
+          (!Array.isArray(data.value) || data.value.length !== 2)
+        )
+          return false;
+        return true;
+      },
+      { message: 'Between must have two values' }
+    ),
   pointsRequired: z
     .number()
     .min(0, 'Points required cannot be negative')
     .max(10000, 'Points required too high')
     .optional(),
+  isActive: z.boolean().default(true),
   rarityLevel: z.enum(['common', 'rare', 'epic', 'legendary']).optional(),
   rewardData: z
     .object({
@@ -86,7 +96,7 @@ export const createBadgeSchema = z.object({
         .max(5000, 'XP bonus too high')
         .optional(),
       profileBadge: z.boolean().optional(),
-      specialPrivileges: z.array(z.string()).optional(),
+      specialPrivileges: z.array(z.string().min(1)).optional(),
     })
     .optional(),
   category: z

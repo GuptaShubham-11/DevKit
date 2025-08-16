@@ -186,20 +186,14 @@ async function getUserBadgeProgress(userId: string) {
       case 'templatesCreated':
         currentValue = userStats.templatesCreated || 0;
         break;
-      case 'downloadsReceived':
-        currentValue = userStats.downloadsReceived || 0;
+      case 'copiesReceived':
+        currentValue = userStats.copiesReceived || 0;
         break;
       case 'commandsGenerated':
         currentValue = userStats.commandsGenerated || 0;
         break;
       case 'likesReceived':
         currentValue = userStats.likesReceived || 0;
-        break;
-      case 'reviewsWritten':
-        currentValue = userStats.reviewsWritten || 0;
-        break;
-      case 'communityHelper':
-        currentValue = userStats.totalEarnings || 0;
         break;
       default:
         currentValue = 0;
