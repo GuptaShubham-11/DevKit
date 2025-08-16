@@ -1,4 +1,5 @@
 import { connectToDatabase } from '@/lib/db';
+import { Notification } from '@/models/notification';
 import { User } from '@/models/user';
 import { verifyOtpSchema } from '@/validation/auth';
 import { NextRequest, NextResponse } from 'next/server';
@@ -63,6 +64,13 @@ export async function PATCH(request: NextRequest) {
     user.lockedUntil = undefined;
     user.emailVerifiedAt = now;
     await user.save({ validateBeforeSave: false });
+
+    await Notification.create({
+      userId: user.id,
+      type: 'welcome',
+      title: 'Welcome to DevKit!',
+      message: 'Welcome to DevKit! Your email has been verified.',
+    });
 
     return NextResponse.json(
       { message: 'Email verified successfully' },
