@@ -20,6 +20,7 @@ export interface IPackageManager extends Document {
   metadata: Record<string, any>;
   createdAt: Date;
   updatedAt: Date;
+  __v?: number;
 }
 
 const packageManagerSchema = new Schema<IPackageManager>(
