@@ -61,7 +61,7 @@ export const createBadgeSchema = z.object({
         'copiesReceived',
         'commandsGenerated',
         'likesReceived',
-        'communityHelper'
+        'communityHelper',
       ]),
       condition: z.enum(['gte', 'lte', 'eq', 'between']),
       value: z.number().min(1),

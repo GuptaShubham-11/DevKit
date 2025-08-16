@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       pointsRequired,
       rarityLevel,
       rewardData,
-      category
+      category,
     });
 
     return NextResponse.json(

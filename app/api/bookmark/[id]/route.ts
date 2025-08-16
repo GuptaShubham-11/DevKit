@@ -66,7 +66,11 @@ export async function PUT(request: NextRequest, { params }: Props) {
 
     // Populate for response
     await bookmark.populate([
-      { path: 'templateId', select: 'name description creatorId status viewsCount likesCount copiesCount' },
+      {
+        path: 'templateId',
+        select:
+          'name description creatorId status viewsCount likesCount copiesCount',
+      },
       { path: 'collectionId', select: 'name color icon' },
     ]);
 

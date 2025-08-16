@@ -20,7 +20,15 @@ export interface IBadge extends Document {
     specialPrivileges?: string[];
   };
   isActive: boolean;
-  category: 'general' | 'creator' | 'community' | 'usage' | 'milestone' | 'special' | 'seasonal' | 'achievement';
+  category:
+    | 'general'
+    | 'creator'
+    | 'community'
+    | 'usage'
+    | 'milestone'
+    | 'special'
+    | 'seasonal'
+    | 'achievement';
   createdAt: Date;
   updatedAt: Date;
   __v?: number;

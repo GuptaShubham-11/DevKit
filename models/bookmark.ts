@@ -50,7 +50,7 @@ const bookmarkSchema = new Schema<IBookmark>(
         ref: 'Tag',
         maxlength: 50,
         trim: true,
-      }
+      },
     ],
     isPrivate: {
       type: Boolean,

@@ -3,12 +3,8 @@ import { z } from 'zod';
 export const createBookmarkSchema = z.object({
   templateId: z.string(),
   collectionId: z.string().optional(),
-  notes: z.string()
-    .max(1000, 'Notes too long')
-    .optional(),
-  tags: z.array(z.string())
-    .max(10, 'Too many tags')
-    .optional(),
+  notes: z.string().max(1000, 'Notes too long').optional(),
+  tags: z.array(z.string()).max(10, 'Too many tags').optional(),
   priority: z.enum(['low', 'medium', 'high']).optional(),
   isPrivate: z.boolean().optional(),
 });
