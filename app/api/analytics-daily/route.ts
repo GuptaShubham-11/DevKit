@@ -114,7 +114,7 @@ export async function GET(request: NextRequest) {
         $group: {
           _id: groupBy,
           totalViews: { $sum: '$views' },
-          totalDownloads: { $sum: '$downloads' },
+          totalCopies: { $sum: '$copies' },
           totalLikes: { $sum: '$likes' },
           totalCommandsGenerated: { $sum: '$commandsGenerated' },
           uniqueUsers: { $sum: '$uniqueUsers' },
@@ -141,14 +141,14 @@ export async function GET(request: NextRequest) {
         $group: {
           _id: '$templateId',
           totalViews: { $sum: '$views' },
-          totalDownloads: { $sum: '$downloads' },
+          totalCopies: { $sum: '$copies' },
           totalLikes: { $sum: '$likes' },
           score: {
             $sum: {
               $add: [
                 { $multiply: ['$views', 1] },
                 { $multiply: ['$likes', 3] },
-                { $multiply: ['$downloads', 5] },
+                { $multiply: ['$copies', 5] },
               ],
             },
           },
@@ -171,7 +171,7 @@ export async function GET(request: NextRequest) {
           templateName: '$template.name',
           creatorId: '$template.creatorId',
           totalViews: 1,
-          totalDownloads: 1,
+          totalCopies: 1,
           totalLikes: 1,
           performanceScore: '$score',
           _id: 0,
@@ -193,7 +193,7 @@ export async function GET(request: NextRequest) {
           end: endingDate.toISOString(),
           days: Math.ceil(
             (endingDate.getTime() - startingDate.getTime()) /
-            (1000 * 60 * 60 * 24)
+              (1000 * 60 * 60 * 24)
           ),
           aggregateBy,
         },
@@ -217,7 +217,7 @@ export async function GET(request: NextRequest) {
 async function getRealTimeAnalytics(baseConditions: any, today: Date) {
   const todayConditions = {
     ...baseConditions,
-    created_at: { $gte: today },
+    createdAt: { $gte: today },
   };
 
   const [activities, commands] = await Promise.all([
@@ -246,7 +246,7 @@ async function getRealTimeAnalytics(baseConditions: any, today: Date) {
     date: today.toISOString(),
     views: activityBreakdown.view?.count || 0,
     likes: activityBreakdown.like?.count || 0,
-    downloads: activityBreakdown.download?.count || 0,
+    copies: activityBreakdown.download?.count || 0,
     commandsGenerated: commands,
     uniqueUsers: new Set(activities.flatMap((a) => a.uniqueUsers)).size,
     isRealtime: true,
@@ -274,7 +274,7 @@ async function calculateGrowthRates(baseConditions: any, days: number) {
         $group: {
           _id: null,
           views: { $sum: '$views' },
-          downloads: { $sum: '$downloads' },
+          copies: { $sum: '$copies' },
           likes: { $sum: '$likes' },
           commands: { $sum: '$commandsGenerated' },
         },
@@ -291,7 +291,7 @@ async function calculateGrowthRates(baseConditions: any, days: number) {
         $group: {
           _id: null,
           views: { $sum: '$views' },
-          downloads: { $sum: '$downloads' },
+          copies: { $sum: '$copies' },
           likes: { $sum: '$likes' },
           commands: { $sum: '$commandsGenerated' },
         },
@@ -301,13 +301,13 @@ async function calculateGrowthRates(baseConditions: any, days: number) {
 
   const current = currentPeriod[0] || {
     views: 0,
-    downloads: 0,
+    copies: 0,
     likes: 0,
     commands: 0,
   };
   const previous: any = previousPeriod || {
     views: 0,
-    downloads: 0,
+    copies: 0,
     likes: 0,
     commands: 0,
   };
@@ -319,7 +319,7 @@ async function calculateGrowthRates(baseConditions: any, days: number) {
 
   return {
     views: calculateGrowth(current.views, previous.views),
-    downloads: calculateGrowth(current.downloads, previous.downloads),
+    copies: calculateGrowth(current.copies, previous.copies),
     likes: calculateGrowth(current.likes, previous.likes),
     commandsGenerated: calculateGrowth(current.commands, previous.commands),
   };

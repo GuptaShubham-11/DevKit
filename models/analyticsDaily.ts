@@ -6,11 +6,10 @@ export interface IAnalyticsDaily extends Document {
   templateId?: mongoose.Types.ObjectId;
   userId?: mongoose.Types.ObjectId;
   views: number;
-  downloads: number;
+  copies: number;
   likes: number;
   commandsGenerated: number;
   uniqueUsers: number;
-  revenue: number;
   createdAt: Date;
 }
 
@@ -32,7 +31,7 @@ const analyticsDailySchema = new Schema<IAnalyticsDaily>(
       type: Number,
       default: 0,
     },
-    downloads: {
+    copies: {
       type: Number,
       default: 0,
     },
@@ -45,10 +44,6 @@ const analyticsDailySchema = new Schema<IAnalyticsDaily>(
       default: 0,
     },
     uniqueUsers: {
-      type: Number,
-      default: 0,
-    },
-    revenue: {
       type: Number,
       default: 0,
     },
