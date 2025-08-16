@@ -11,6 +11,7 @@ export const createProjectOptionSchema = z.object({
     .string()
     .min(1, 'Description is required')
     .max(500, 'Description too long'),
+  optionType: z.string().max(1, 'Option type is required'),
   category: z.array(z.string()).min(1, 'Category is required'),
   packageManager: z.array(z.string()).min(1, 'Package manager is required'),
   tags: z.array(z.string()).min(1, 'Tags are required'),

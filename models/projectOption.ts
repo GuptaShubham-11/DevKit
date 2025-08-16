@@ -6,6 +6,7 @@ export interface IProjectOption extends Document {
   description: string;
   category: mongoose.Types.ObjectId[];
   tags: mongoose.Types.ObjectId[];
+  optionType: 'folder' | 'file' | 'package' | 'init';
   command: string;
   packageManager: mongoose.Types.ObjectId[];
   isActive: boolean;
@@ -45,6 +46,11 @@ const projectOptionSchema = new Schema<IProjectOption>(
         required: true,
       },
     ],
+    optionType: {
+      type: String,
+      required: true,
+      enum: ['folder', 'file', 'package', 'init'],
+    },
     command: {
       type: String,
       required: true,
