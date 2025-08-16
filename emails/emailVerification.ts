@@ -1,4 +1,4 @@
-export function emailVarificationHtml(otp: string) {
+export function emailVerificationHtml(otp: string) {
   return `
     <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #000000 0%, #0a0a0a 100%); color: #ffffff; padding: 0; margin: 0; width: 100%;">
       <div style="max-width: 600px; margin: 0 auto; background-color: #000000; border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);">
