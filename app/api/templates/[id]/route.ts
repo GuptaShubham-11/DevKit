@@ -203,18 +203,6 @@ export async function PUT(request: NextRequest, { params }: Props) {
       });
     }
 
-    // Validate premium pricing
-    if (
-      updateData.isPremium &&
-      updateData.price !== undefined &&
-      updateData.price <= 0
-    ) {
-      return NextResponse.json(
-        { error: 'Premium templates must have a price greater than 0' },
-        { status: 400 }
-      );
-    }
-
     // Update template
     const updatedTemplate = await Template.findByIdAndUpdate(
       id,

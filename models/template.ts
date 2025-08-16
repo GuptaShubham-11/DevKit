@@ -7,18 +7,17 @@ export interface ITemplate extends Document {
   content: string; // Main setup commands
   creatorId: mongoose.Types.ObjectId;
   categoryId?: mongoose.Types.ObjectId;
-  supportedPackageManagers: string[]; // ["npm", "pnpm", "yarn", "bun"]
+  supportedPackageManagers: mongoose.Types.ObjectId[];
   tags: mongoose.Types.ObjectId[];
-  downloadsCount: number;
+  copiesCount: number;
   likesCount: number;
   viewsCount: number;
-  isPremium: boolean;
-  price: number;
   status: 'draft' | 'published' | 'archived';
   featuredUntil?: Date;
   lastUpdated: Date;
   createdAt: Date;
   updatedAt: Date;
+  __v?: number;
 }
 
 const templateSchema = new Schema<ITemplate>(
@@ -48,7 +47,7 @@ const templateSchema = new Schema<ITemplate>(
       type: Schema.Types.ObjectId,
       ref: 'Category',
     },
-    downloadsCount: {
+    copiesCount: {
       type: Number,
       default: 0,
       min: 0,
@@ -59,15 +58,6 @@ const templateSchema = new Schema<ITemplate>(
       min: 0,
     },
     viewsCount: {
-      type: Number,
-      default: 0,
-      min: 0,
-    },
-    isPremium: {
-      type: Boolean,
-      default: false,
-    },
-    price: {
       type: Number,
       default: 0,
       min: 0,
@@ -92,8 +82,9 @@ const templateSchema = new Schema<ITemplate>(
     },
     supportedPackageManagers: [
       {
-        type: String,
-        enum: ['npm', 'pnpm', 'yarn', 'bun'],
+        type: Schema.Types.ObjectId,
+        ref: 'PackageManager',
+        required: true,
       },
     ],
   },
@@ -104,7 +95,7 @@ const templateSchema = new Schema<ITemplate>(
 templateSchema.index({ creatorId: 1 });
 templateSchema.index({ categoryId: 1 });
 templateSchema.index({ status: 1 });
-templateSchema.index({ downloadsCount: -1 });
+templateSchema.index({ copiesCount: -1 });
 templateSchema.index({ featuredUntil: 1 });
 templateSchema.index({ name: 'text', description: 'text' });
 

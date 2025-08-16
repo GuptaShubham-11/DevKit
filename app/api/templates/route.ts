@@ -9,6 +9,7 @@ import {
   getTemplatesSchema,
 } from '@/validation/template';
 import { authOptions } from '@/lib/auth';
+import { IPackageManager, PackageManager } from '@/models/packageManager';
 
 export async function POST(request: NextRequest) {
   try {
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
       name,
       description,
       content,
+      supportedPackageManagers,
       categoryId,
       isPremium = false,
       tags = [],
@@ -83,6 +85,7 @@ export async function POST(request: NextRequest) {
       content,
       creatorId: session.user.id,
       categoryId,
+      supportedPackageManagers,
       tags,
       isPremium,
       price,
@@ -143,6 +146,7 @@ export async function GET(request: NextRequest) {
     }
 
     const {
+      packageManagerId,
       search,
       category,
       creator,
@@ -218,13 +222,36 @@ export async function GET(request: NextRequest) {
     }
 
     // Execute query with population
-    const templates = await Template.find(conditions)
+    let templates = await Template.find(conditions)
+      .populate(
+        'supportedPackageManagers',
+        'displayName installCmd addPackageCmd devCmd buildCmd'
+      )
       .populate('creatorId', 'username profileImage')
       .populate('categoryId', 'name slug icon')
       .sort(String(sortObj))
       .limit(limit)
       .skip(offset)
       .lean();
+
+    // If packageManagerId was provided, replace placeholders:
+    if (packageManagerId) {
+      const pm = (await PackageManager.findById(
+        packageManagerId
+      ).lean()) as IPackageManager;
+      if (!pm)
+        return NextResponse.json({ error: 'Invalid pmId' }, { status: 400 });
+      templates = templates.map((t) => {
+        let rendered = t.content;
+        rendered = rendered.replace(/{{\s*pm\s*}}/g, pm.name);
+        rendered = rendered.replace(
+          /{{\s*pm\.addPackageCmd\s*}}/g,
+          pm.addPackageCmd
+        );
+        rendered = rendered.replace(/{{\s*pm\.devCmd\s*}}/g, pm.devCmd);
+        return { ...t, renderedContent: rendered };
+      });
+    }
 
     // Get total count for pagination
     const total = await Template.countDocuments(conditions);
