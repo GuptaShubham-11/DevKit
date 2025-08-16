@@ -1,14 +1,15 @@
 import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/user';
 import { NextRequest, NextResponse } from 'next/server';
-import { emailSchema } from '@/validation/auth';
+import { requestOtpSchema } from '@/validation/auth';
 import { sendEmail } from '@/lib/email';
 import { resetPasswordHtml } from '@/emails/resetPassword';
+import { generateOtp } from '@/lib/generateOtp';
 
 export async function PATCH(request: NextRequest) {
   try {
     const reqData = await request.json();
-    const validatedData = emailSchema.safeParse(reqData);
+    const validatedData = requestOtpSchema.safeParse(reqData);
 
     if (!validatedData.success) {
       return NextResponse.json(
@@ -33,10 +34,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Generate a secure OTP
-    const otp = Math.floor(Math.random() * 1000000)
-      .toString()
-      .padStart(6, '0');
+    const otp = generateOtp();
 
     // Save OTP and expiration
     user.otp = otp;

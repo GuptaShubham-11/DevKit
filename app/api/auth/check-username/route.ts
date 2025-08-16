@@ -5,8 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const usernameParam = searchParams.get('username');
+    const usernameParam = request.nextUrl.searchParams.get('username');
 
     if (!usernameParam) {
       return NextResponse.json(
@@ -15,36 +14,41 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const validatedData = usernameSchema.safeParse(usernameParam);
-
-    if (!validatedData.success) {
+    // Validate and normalize username
+    const parsed = usernameSchema.safeParse(usernameParam);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: validatedData.error.issues[0].message },
+        { error: parsed.error.issues[0].message },
         { status: 400 }
       );
     }
-
-    const username = validatedData.data;
+    const username = parsed.data;
 
     await connectToDatabase();
 
-    const existingUser = await User.findOne({ username });
+    // Case-insensitive lookup
+    const existingUser = await User.findOne({ username })
+      .collation({
+        locale: 'en',
+        strength: 2,
+      })
+      .lean();
 
     if (existingUser) {
       return NextResponse.json(
-        { error: 'Username already exists!' },
-        { status: 409 } // 409 Conflict is more semantically correct here
+        { available: false, error: 'Username already taken.' },
+        { status: 409 }
       );
     }
 
     return NextResponse.json(
-      { message: 'Username available.' },
+      { available: true, message: 'Username is available.' },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Error checking username', error);
+  } catch (err) {
+    console.error('Error checking username:', err);
     return NextResponse.json(
-      { error: 'Checking username failed' },
+      { error: 'Failed to check username availability.' },
       { status: 500 }
     );
   }

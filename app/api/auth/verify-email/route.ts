@@ -5,61 +5,74 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(request: NextRequest) {
   try {
-    const reqData = await request.json();
-    const validatedData = verifyOtpSchema.safeParse(reqData);
+    const reqData = await request.json().catch(() => null);
 
-    if (!validatedData.success) {
+    if (!reqData) {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
+
+    // Validate input
+    const parsed = verifyOtpSchema.safeParse(reqData);
+
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: validatedData.error.issues[0].message },
+        { error: parsed.error.issues[0].message },
         { status: 400 }
       );
     }
-
-    const { email, otp } = validatedData.data;
+    const { email, otp } = parsed.data;
 
     await connectToDatabase();
 
+    // Lookup user
     const user = await User.findOne({ email });
-
     if (!user) {
-      return NextResponse.json({ error: 'User not found!' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
     if (user.isVerified) {
       return NextResponse.json(
-        { message: 'Email already verified!' },
+        { message: 'Email already verified' },
         { status: 200 }
       );
     }
 
-    // Validate OTP expiry and OTP match
     const now = new Date();
+
+    // Check OTP expiry
     if (!user.otp || !user.otpExpiry || user.otpExpiry < now) {
       return NextResponse.json(
-        { error: 'OTP expired or invalid, please request a new code.' },
+        { error: 'OTP expired or invalid. Please request a new code.' },
         { status: 400 }
       );
     }
 
+    // Check OTP match
     if (user.otp !== otp) {
-      return NextResponse.json({ error: 'Invalid OTP!' }, { status: 400 });
+      // Increment loginAttempts to deter brute-force
+      user.loginAttempts = (user.loginAttempts || 0) + 1;
+      await user.save({ validateBeforeSave: false });
+      return NextResponse.json({ error: 'Invalid OTP' }, { status: 400 });
     }
 
-    // Mark user as verified and clear OTP fields
+    // Mark verified and clear OTP
     user.isVerified = true;
-    user.otp = null;
-    user.otpExpiry = null;
-    await user.save();
+    user.otp = undefined;
+    user.otpExpiry = undefined;
+    user.loginAttempts = 0;
+    user.lockedUntil = undefined;
+    user.emailVerifiedAt = now;
+    await user.save({ validateBeforeSave: false });
 
     return NextResponse.json(
-      { message: 'Email verified successfully.' },
+      { message: 'Email verified successfully' },
       { status: 200 }
     );
   } catch (error) {
     console.error('Error verifying email:', error);
     return NextResponse.json(
-      { error: 'Verification failed due to server error.' },
-      { status: 500 }
+      { error: 'Failed to verify email!' },
+      { status: 400 }
     );
   }
 }

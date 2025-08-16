@@ -22,8 +22,19 @@ export interface IUser {
   };
   otp?: string;
   otpExpiry?: Date;
+  emailVerifiedAt: Date;
+  lastLoginAt?: Date;
+  loginAttempts?: number;
+  lockedUntil?: Date;
+  bio?: string;
+  website?: string;
+  githubUsername?: string;
+  isDeleted?: boolean;
+  deletedAt?: Date;
+  lastActiveAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  __v?: number;
 }
 
 const userSchema = new Schema<IUser>(
@@ -69,6 +80,38 @@ const userSchema = new Schema<IUser>(
       type: String,
     },
     otpExpiry: {
+      type: Date,
+    },
+    emailVerifiedAt: {
+      type: Date,
+    },
+    lastLoginAt: {
+      type: Date,
+    },
+    loginAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lockedUntil: {
+      type: Date,
+    },
+    bio: {
+      type: String,
+    },
+    website: {
+      type: String,
+    },
+    githubUsername: {
+      type: String,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+    },
+    lastActiveAt: {
       type: Date,
     },
   },

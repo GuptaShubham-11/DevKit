@@ -3,84 +3,78 @@ import { NextRequest, NextResponse } from 'next/server';
 import { User } from '@/models/user';
 import { registerSchema } from '@/validation/auth';
 import { sendEmail } from '@/lib/email';
-import { emailVarificationHtml } from '@/emails/emailVarification';
+import { emailVerificationHtml } from '@/emails/emailVerification';
+import { generateOtp } from '@/lib/generateOtp';
 
 export async function POST(request: NextRequest) {
+  const reqData = await request.json().catch(() => null);
+  if (!reqData) {
+    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+  }
+
+  const parsed = registerSchema.safeParse(reqData);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0].message },
+      { status: 400 }
+    );
+  }
+
+  const { email, username, password } = parsed.data;
+
   try {
-    const reqData = await request.json();
-    const validatedData = registerSchema.safeParse(reqData);
-
-    if (!validatedData.success) {
-      return NextResponse.json(
-        { error: validatedData.error.issues[0].message },
-        { status: 400 }
-      );
-    }
-
-    const { email, username, password } = validatedData.data;
-
     await connectToDatabase();
 
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
+    const existing = await User.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { username: username.toLowerCase() },
+      ],
     });
 
-    // User is already registered and verified
-    if (existingUser && existingUser.isVerified) {
+    // If verified user exists, stop
+    if (existing?.isVerified) {
       return NextResponse.json(
-        { error: 'User already exists!' },
-        { status: 400 }
+        { error: 'Email or username already in use' },
+        { status: 409 }
       );
     }
 
-    const otp = Math.floor(Math.random() * 1000000)
-      .toString()
-      .padStart(6, '0');
+    // Generate OTP and expiry (15 minutes)
+    const otp = generateOtp();
     const otpExpiry = new Date(Date.now() + 15 * 60 * 1000);
 
-    // User exists, but is not verified
-    if (existingUser && !existingUser.isVerified) {
-      // Only update the OTP and expiry
-      existingUser.otp = otp;
-      existingUser.otpExpiry = otpExpiry;
-      await existingUser.save({ validateBeforeSave: false });
-
-      await sendEmail({
-        emailAddress: existingUser.email,
-        emailSubject: 'DEVKIT - Verify Your Account',
-        htmlText: emailVarificationHtml(otp),
+    // If user exists but not verified, update OTP
+    if (existing) {
+      existing.otp = otp;
+      existing.otpExpiry = otpExpiry;
+      existing.emailVerifiedAt = null; // reset
+      await existing.save({ validateBeforeSave: false });
+    } else {
+      await User.create({
+        email: email.toLowerCase(),
+        username: username.toLowerCase(),
+        password,
+        otp,
+        otpExpiry,
+        isVerified: false,
       });
-
-      return NextResponse.json(
-        {
-          message: 'A verification code has been sent to your email address.',
-        },
-        { status: 200 }
-      );
     }
 
-    await User.create({
-      email,
-      username,
-      password,
-      otp,
-      otpExpiry,
-    });
-
-    await sendEmail({
-      emailAddress: email,
+    sendEmail({
+      emailAddress: email.toLowerCase(),
       emailSubject: 'DEVKIT - Verify Your Account',
-      htmlText: emailVarificationHtml(otp),
+      htmlText: emailVerificationHtml(otp),
     });
 
     return NextResponse.json(
-      { message: 'A verification code has been sent to your email address.' },
+      { message: 'Verification code sent to your email.' },
       { status: 200 }
     );
-  } catch (error) {
-    console.error('Error registering user: ', error);
+  } catch (err) {
+    console.error('Registration error:', err);
     return NextResponse.json(
-      { error: 'Failed to register user!' },
+      { error: 'Registration failed. Please try again.' },
       { status: 500 }
     );
   }
