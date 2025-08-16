@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectToDatabase } from '@/lib/db';
 import { Badge, IBadge } from '@/models/badge';
 import { IUserStats, UserStats } from '@/models/userStats';
@@ -11,7 +12,6 @@ export async function GET(request: NextRequest) {
     const queryParams = Object.fromEntries(searchParams.entries());
 
     const validatedQuery = getBadgesSchema.safeParse(queryParams);
-
     if (!validatedQuery.success) {
       return NextResponse.json(
         { error: validatedQuery.error.issues[0].message },
@@ -34,51 +34,36 @@ export async function GET(request: NextRequest) {
     await connectToDatabase();
 
     // Build query conditions
-    const conditions: {
-      category?: string;
-      rarityLevel?: 'common' | 'rare' | 'epic' | 'legendary';
-      isActive?: boolean;
-    } = {};
-
-    if (category) {
-      conditions.category = category;
-    }
-
-    if (rarity) {
-      conditions.rarityLevel = rarity;
-    }
-
-    if (!includeInactive) {
-      conditions.isActive = true;
-    }
+    const conditions: any = {};
+    if (category) conditions.category = category;
+    if (rarity) conditions.rarityLevel = rarity;
+    if (!includeInactive) conditions.isActive = true;
 
     // Build sort object
-    const sortObj: {
-      [key: string]: 1 | -1;
-    } = {};
-    if (sort === 'rarity') {
-      sortObj.rarityLevel = order === 'desc' ? -1 : 1;
-    } else if (sort === 'category') {
-      sortObj.category = order === 'desc' ? -1 : 1;
-    } else if (sort === 'createdAt') {
-      sortObj.createdAt = order === 'desc' ? -1 : 1;
-    } else if (sort === 'name') {
-      sortObj.name = order === 'desc' ? -1 : 1;
+    const sortObj: any = {};
+    switch (sort) {
+      case 'rarity':
+        sortObj.rarityLevel = order === 'desc' ? -1 : 1;
+        break;
+      case 'category':
+        sortObj.category = order === 'desc' ? -1 : 1;
+        break;
+      case 'createdAt':
+        sortObj.createdAt = order === 'desc' ? -1 : 1;
+        break;
+      case 'name':
+        sortObj.name = order === 'desc' ? -1 : 1;
+        break;
+      default:
+        sortObj.pointsRequired = 1;
     }
-
-    // Add secondary sort
-    sortObj.pointsRequired = 1;
-    sortObj.createdAt = -1;
+    sortObj.createdAt = -1; // Secondary sort
 
     // Execute main query
-    const badges = await Badge.find(conditions)
-      .sort(sortObj)
-      .limit(limit)
-      .skip(offset)
-      .lean();
-
-    // Get total count for pagination
-    const total = await Badge.countDocuments(conditions);
+    const [badges, total] = await Promise.all([
+      Badge.find(conditions).sort(sortObj).limit(limit).skip(offset).lean(),
+      Badge.countDocuments(conditions),
+    ]);
 
     let result = badges as IBadge[];
 
@@ -88,43 +73,46 @@ export async function GET(request: NextRequest) {
 
       result = badges.map((badge: any) => {
         const progress = progressData?.find(
-          (p) => p.badge._id.toString() === badge._id.toString()
+          (p: any) => p.badge._id.toString() === badge._id.toString()
         );
         return {
           ...badge,
-          userProgress: progress
-            ? {
-                earned: progress.earned,
-                earnedAt: progress.earnedAt,
-                progressPercentage: progress.progressPercentage,
-                currentValue: progress.currentValue,
-                targetValue: progress.targetValue,
-              }
-            : null,
+          userProgress: progress || {
+            earned: false,
+            earnedAt: null,
+            progressPercentage: 0,
+            currentValue: 0,
+            targetValue: badge.criteria.value,
+          },
         };
       });
     }
 
-    // Group by category for better organization
-    const groupedBadges = groupBadgesByCategory(result);
-
-    // Get category stats
-    const categoryStats = await Badge.aggregate([
-      { $match: conditions },
-      {
-        $group: {
-          _id: '$category',
-          count: { $sum: 1 },
-          rarities: { $addToSet: '$rarityLevel' },
+    // Get stats in parallel
+    const [categoryStats, rarityDistribution] = await Promise.all([
+      Badge.aggregate([
+        { $match: conditions },
+        {
+          $group: {
+            _id: '$category',
+            count: { $sum: 1 },
+            rarities: { $addToSet: '$rarityLevel' },
+          },
         },
-      },
-      { $sort: { _id: 1 } },
+        { $sort: { _id: 1 } },
+      ]),
+      Badge.aggregate([
+        { $match: conditions },
+        { $group: { _id: '$rarityLevel', count: { $sum: 1 } } },
+        { $sort: { _id: 1 } },
+      ]),
     ]);
 
-    return NextResponse.json(
-      {
+    return NextResponse.json({
+      success: true,
+      data: {
         badges: result,
-        badgesByCategory: groupedBadges,
+        badgesByCategory: groupBadgesByCategory(result),
         pagination: {
           total,
           limit,
@@ -137,15 +125,10 @@ export async function GET(request: NextRequest) {
           totalBadges: total,
           activeBadges: await Badge.countDocuments({ isActive: true }),
           categories: categoryStats,
-          rarityDistribution: await Badge.aggregate([
-            { $match: conditions },
-            { $group: { _id: '$rarityLevel', count: { $sum: 1 } } },
-            { $sort: { _id: 1 } },
-          ]),
+          rarityDistribution,
         },
       },
-      { status: 200 }
-    );
+    });
   } catch (error) {
     console.error('Error fetching badges:', error);
     return NextResponse.json(
@@ -157,64 +140,77 @@ export async function GET(request: NextRequest) {
 
 // Helper function to get user badge progress
 async function getUserBadgeProgress(userId: string) {
-  const userStats = (await UserStats.findOne({ userId }).lean()) as IUserStats;
-  if (!userStats) return [];
+  if (!mongoose.isValidObjectId(userId)) return [];
 
-  const badges = (await Badge.find({ isActive: true }).lean()) as IBadge[];
-  const userBadges = (await UserBadge.find({ userId }).lean()) as IUserBadge[];
-  const earnedBadges = new Map(
-    userBadges.map((ub) => [ub.badgeId.toString(), ub])
-  );
+  try {
+    const [userStats, badges, userBadges]: any = await Promise.all([
+      UserStats.findOne({ userId }).lean(),
+      Badge.find({ isActive: true }).lean(),
+      UserBadge.find({ userId }).lean(),
+    ]);
 
-  return badges.map((badge) => {
-    const userBadge = earnedBadges.get(badge._id.toString());
+    if (!userStats) return [];
 
-    if (userBadge) {
-      return {
-        badge,
-        earned: true,
-        earnedAt: userBadge.earnedAt,
-        progressPercentage: 100,
-        currentValue: badge.criteria.value,
-        targetValue: badge.criteria.value,
-      };
-    }
-
-    // Calculate current progress
-    let currentValue = 0;
-    switch (badge.criteria.type) {
-      case 'templatesCreated':
-        currentValue = userStats.templatesCreated || 0;
-        break;
-      case 'copiesReceived':
-        currentValue = userStats.copiesReceived || 0;
-        break;
-      case 'commandsGenerated':
-        currentValue = userStats.commandsGenerated || 0;
-        break;
-      case 'likesReceived':
-        currentValue = userStats.likesReceived || 0;
-        break;
-      default:
-        currentValue = 0;
-    }
-
-    const progressPercentage = Math.min(
-      Math.round((currentValue / badge.criteria.value) * 100),
-      100
+    const earnedBadges = new Map(
+      userBadges.map((ub: any) => [ub.badgeId.toString(), ub])
     );
 
-    return {
-      badge,
-      earned: false,
-      progressPercentage: progressPercentage,
-      currentValue: currentValue,
-      targetValue: badge.criteria.value,
-    };
-  });
+    return badges.map((badge: any) => {
+      const userBadge = earnedBadges.get(badge._id.toString()) as any;
+
+      if (userBadge) {
+        return {
+          badge,
+          earned: true,
+          earnedAt: userBadge?.earnedAt,
+          progressPercentage: 100,
+          currentValue: badge.criteria.value,
+          targetValue: badge.criteria.value,
+        };
+      }
+
+      // Calculate current progress based on criteria type
+      let currentValue = 0;
+      switch (badge.criteria.type) {
+        case 'templatesCreated':
+          currentValue = userStats.templatesCreated || 0;
+          break;
+        case 'downloadsReceived':
+          currentValue = userStats.downloadsReceived || 0;
+          break;
+        case 'commandsGenerated':
+          currentValue = userStats.commandsGenerated || 0;
+          break;
+        case 'likesReceived':
+          currentValue = userStats.likesReceived || 0;
+          break;
+        case 'totalViews':
+          currentValue = userStats.totalViews || 0;
+          break;
+        default:
+          currentValue = 0;
+      }
+
+      const progressPercentage = Math.min(
+        Math.round((currentValue / badge.criteria.value) * 100),
+        100
+      );
+
+      return {
+        badge,
+        earned: false,
+        progressPercentage,
+        currentValue,
+        targetValue: badge.criteria.value,
+      };
+    });
+  } catch (error) {
+    console.error('Error calculating badge progress:', error);
+    return [];
+  }
 }
 
-// Helper functions
+// Helper function to group badges by category
 function groupBadgesByCategory(badges: IBadge[]): Record<string, IBadge[]> {
   return badges.reduce((acc: Record<string, IBadge[]>, badge: IBadge) => {
     const category = badge.category || 'general';
