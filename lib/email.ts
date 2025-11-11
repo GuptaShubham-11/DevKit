@@ -25,7 +25,7 @@ export function sendEmail({
     const transporter = nodemailer.createTransport(mailConfig);
 
     const mailDetails = {
-      from: 'DEVKIT',
+      from: 'DevKit',
       to: emailAddress,
       subject: emailSubject,
       html: htmlText,
@@ -33,7 +33,7 @@ export function sendEmail({
 
     transporter.sendMail(mailDetails);
   } catch (error) {
-    console.error('Nodemailer send mail error', error);
+    // console.error('Nodemailer send mail error', error);
     return error;
   }
 }
