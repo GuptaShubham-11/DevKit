@@ -4,7 +4,7 @@ import mongoose, { model, models, Schema } from 'mongoose';
 
 export interface IUser
   extends Document,
-  Omit<SharedUser, '_id' | 'emailVerifiedAt' | 'createdAt' | 'updatedAt'> {
+    Omit<SharedUser, '_id' | 'emailVerifiedAt' | 'createdAt' | 'updatedAt'> {
   _id: mongoose.Types.ObjectId;
   emailVerifiedAt: Date;
   createdAt: Date;
