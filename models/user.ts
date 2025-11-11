@@ -1,40 +1,14 @@
-import mongoose, { model, models, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { User as SharedUser } from '../types/shared/user';
+import mongoose, { model, models, Schema } from 'mongoose';
 
-export interface IUser {
+export interface IUser
+  extends Document,
+  Omit<SharedUser, '_id' | 'emailVerifiedAt' | 'createdAt' | 'updatedAt'> {
   _id: mongoose.Types.ObjectId;
-  email: string;
-  username: string;
-  password: string;
-  isAdmin: boolean;
-  profileImage?: string;
-  subscriptionTier: string;
-  isVerified: boolean;
-  oAuth?: {
-    google?: {
-      id: string;
-      email: string;
-    };
-    profile?: {
-      name: string;
-      image: string;
-    };
-  };
-  otp?: string;
-  otpExpiry?: Date;
   emailVerifiedAt: Date;
-  lastLoginAt?: Date;
-  loginAttempts?: number;
-  lockedUntil?: Date;
-  bio?: string;
-  website?: string;
-  githubUsername?: string;
-  isDeleted?: boolean;
-  deletedAt?: Date;
-  lastActiveAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  __v?: number;
 }
 
 const userSchema = new Schema<IUser>(
