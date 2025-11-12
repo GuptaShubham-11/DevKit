@@ -1,29 +1,23 @@
-import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/user';
+import { connectToDatabase } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import { resetPasswordSchema } from '@/validation/auth';
 
 export async function PUT(request: NextRequest) {
   try {
-    const reqData = await request.json().catch(() => null);
+    const reqData = await request.json();
 
-    if (!reqData) {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-    }
-
-    const validated = resetPasswordSchema.safeParse(reqData);
-    if (!validated.success) {
+    const validatedData = resetPasswordSchema.safeParse(reqData);
+    if (!validatedData.success) {
       return NextResponse.json(
-        { error: validated.error.issues[0].message },
+        { error: validatedData.error.issues[0].message },
         { status: 400 }
       );
     }
-    const { email, otp, newPassword } = validated.data;
-
+    const { email, otp, newPassword } = validatedData.data;
     await connectToDatabase();
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return NextResponse.json({ error: 'Email not found!' }, { status: 404 });
     }
@@ -51,7 +45,6 @@ export async function PUT(request: NextRequest) {
     user.loginAttempts = 0;
     user.lockedUntil = undefined;
 
-    // Save user without validating unrelated fields
     await user.save({ validateBeforeSave: false });
 
     return NextResponse.json(
@@ -59,9 +52,12 @@ export async function PUT(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error resetting password:', error);
+    // console.error('Error resetting password:', error);
     return NextResponse.json(
-      { error: 'Failed to reset password. Please try again.' },
+      {
+        error: 'Failed to reset password. Please try again.',
+        details: error,
+      },
       { status: 500 }
     );
   }
