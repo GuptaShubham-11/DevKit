@@ -7,6 +7,7 @@ export interface IBadge
   _id: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  __v?: number;
 }
 
 const badgeSchema = new Schema<IBadge>(
