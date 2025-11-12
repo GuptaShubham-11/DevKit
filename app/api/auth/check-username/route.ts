@@ -1,5 +1,5 @@
-import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/user';
+import { connectToDatabase } from '@/lib/db';
 import { usernameSchema } from '@/validation/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -15,15 +15,15 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate and normalize username
-    const parsed = usernameSchema.safeParse(usernameParam);
-    if (!parsed.success) {
+    const validatedData = usernameSchema.safeParse(usernameParam);
+    if (!validatedData.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0].message },
+        { error: validatedData.error.issues[0].message },
         { status: 400 }
       );
     }
-    const username = parsed.data;
 
+    const username = validatedData.data;
     await connectToDatabase();
 
     // Case-insensitive lookup
@@ -45,10 +45,13 @@ export async function GET(request: NextRequest) {
       { available: true, message: 'Username is available.' },
       { status: 200 }
     );
-  } catch (err) {
-    console.error('Error checking username:', err);
+  } catch (error) {
+    // console.error('Error checking username:', err);
     return NextResponse.json(
-      { error: 'Failed to check username availability.' },
+      {
+        error: 'Failed to check username availability.',
+        details: error,
+      },
       { status: 500 }
     );
   }
