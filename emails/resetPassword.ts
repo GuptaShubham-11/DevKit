@@ -1,26 +1,32 @@
 export function resetPasswordHtml(otp: string) {
   return `
-    <div style="font-family: 'Inter', Arial, sans-serif; background-color: #000000; color: #ffffff; max-width: 480px; margin: 0 auto; border-radius: 12px; border: 1px solid #1a1a1a; padding: 32px 24px;">
-      <h1 style="font-size: 28px; font-weight: 600; color: #3b82f6; margin: 0 0 18px 0; text-align: center;">Reset Your Password</h1>
-      <p style="font-size: 16px; color: #cccccc; text-align: center; margin-bottom: 32px;">
-        We received a request to reset your DevKit account password.<br>
-        Please enter this code to continue:
-      </p>
-      <div style="text-align: center; margin: 20px 0;">
-        <div style="font-size: 26px; font-family: 'JetBrains Mono', monospace; font-weight: bold; color: #22c55e; background: #1a1a1a; border-radius: 8px; padding: 14px 32px; display: inline-block; cursor: copy; border: 2px solid #3b82f6;">
-          ${otp}
+<div style="font-family: Arial, sans-serif; background-color: #f9f9f9; color: #333; padding: 30px;">
+      <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; padding: 24px; border-radius: 6px; border: 1px solid #e0e0e0;">
+        
+        <h2 style="text-align: center; color: #2563eb; margin-bottom: 5px;">Reset Your Password</h2>
+        <p style="text-align: center; font-size: 14px; color: #555; margin-bottom: 10px;">
+          We received a request to reset your DevKit account password.<br />
+          Use the code below to continue.
+        </p>
+
+        <div style="text-align: center; margin: 20px 0;">
+          <div style="display: inline-block; padding: 12px 20px; background-color: #f0f0f0; border-radius: 4px; border: 1px solid #2563eb;">
+            <span style="font-size: 20px; font-weight: bold; color: #2563eb; letter-spacing: 4px;">398726</span>
+          </div>
         </div>
+
+        <p style="font-size: 13px; color: #666; text-align: center; margin: 20px 0;">
+          This code will expire in 15 minutes. Do not share it with anyone.
+        </p>
+
+        <p style="font-size: 12px; color: #999; text-align: center; margin-top: 30px;">
+          If you did not request this, please ignore this email.
+        </p>
+
+        <p style="font-size: 12px; color: #aaa; text-align: center; margin-top: 2px;">
+          &copy; 2025 DevKit. All rights reserved.
+        </p>
       </div>
-      <div style="background-color: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 16px; margin: 24px 0;">
-        <ul style="padding-left: 20px; color: #ffffff; font-size: 15px; margin: 0;">
-          <li>This OTP is valid for 15 minutes and can only be used once.</li>
-          <li>Do not share this code with anyone for security reasons.</li>
-          <li>If you did not make this request, you can safely ignore this email.</li>
-        </ul>
-      </div>
-      <p style="text-align: center; font-size: 13px; color: #888888; margin-top: 36px;">
-        &copy; 2025 DevKit
-      </p>
     </div>
   `;
 }
