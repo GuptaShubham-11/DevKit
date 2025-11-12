@@ -1,13 +1,12 @@
-import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/user';
-import { usernameSchema } from '@/validation/auth';
 import { NextResponse } from 'next/server';
+import { connectToDatabase } from '@/lib/db';
+import { usernameSchema } from '@/validation/auth';
 import { generateUsername } from '@/lib/generateUsername';
 
 export async function GET() {
   try {
     await connectToDatabase();
-
     const generatedUsernames: string[] | null = await generateUsername();
 
     if (
@@ -49,7 +48,7 @@ export async function GET() {
     if (availableUsernames.length === 0) {
       return NextResponse.json(
         { error: 'No available usernames found!' },
-        { status: 409 } // Conflict
+        { status: 409 }
       );
     }
 
@@ -58,9 +57,12 @@ export async function GET() {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error generating username:', error);
+    // console.error('Error generating username:', error);
     return NextResponse.json(
-      { error: 'Generating username failed!' },
+      {
+        error: 'Generating username failed!',
+        details: error,
+      },
       { status: 500 }
     );
   }
