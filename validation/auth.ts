@@ -8,7 +8,7 @@ const passwordPatternLetter = /(?=.*[A-Za-z])/;
 const passwordPatternNumber = /(?=.*[0-9])/;
 const passwordPatternSpecial = /(?=.*[!@#$%&*])/;
 
-// Registration Schema
+// Registration
 export const registerSchema = z.object({
   email: z
     .string()
@@ -37,7 +37,7 @@ export const registerSchema = z.object({
     .trim(),
 });
 
-// Login Schema
+// Login
 export const loginSchema = z.object({
   email: z
     .string()
@@ -53,7 +53,7 @@ export const loginSchema = z.object({
     .trim(),
 });
 
-// OTP Request Schema
+// OTP Request
 export const requestOtpSchema = z.object({
   email: z
     .string()
@@ -64,7 +64,7 @@ export const requestOtpSchema = z.object({
     .trim(),
 });
 
-// OTP Verification Schema
+// OTP Verification
 export const verifyOtpSchema = z.object({
   email: z
     .string()
@@ -90,7 +90,7 @@ export const usernameSchema = z.object({
     .trim(),
 });
 
-// Password Reset Schema
+// Password Reset
 export const resetPasswordSchema = z.object({
   email: z
     .string()
@@ -117,7 +117,7 @@ export const resetPasswordSchema = z.object({
     .trim(),
 });
 
-// Profile Update Schema
+// Profile Update
 export const updateProfileSchema = z.object({
   profileImage: z.string().url('Invalid profileImage URL').optional(),
   bio: z.string().max(200, 'Bio is too long').optional(),
@@ -130,7 +130,7 @@ export const updateProfileSchema = z.object({
   subscriptionTier: z.enum(['free', 'premium']).optional(),
 });
 
-// Change Password Schema
+// Change Password
 export const changePasswordSchema = z.object({
   currentPassword: z
     .string()
