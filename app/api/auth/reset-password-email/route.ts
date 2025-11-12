@@ -1,16 +1,16 @@
-import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/user';
-import { NextRequest, NextResponse } from 'next/server';
-import { requestOtpSchema } from '@/validation/auth';
 import { sendEmail } from '@/lib/email';
-import { resetPasswordHtml } from '@/emails/resetPassword';
+import { connectToDatabase } from '@/lib/db';
 import { generateOtp } from '@/lib/generateOtp';
+import { requestOtpSchema } from '@/validation/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { resetPasswordHtml } from '@/emails/resetPassword';
 
 export async function PATCH(request: NextRequest) {
   try {
     const reqData = await request.json();
-    const validatedData = requestOtpSchema.safeParse(reqData);
 
+    const validatedData = requestOtpSchema.safeParse(reqData);
     if (!validatedData.success) {
       return NextResponse.json(
         { error: validatedData.error.issues[0].message },
@@ -19,11 +19,9 @@ export async function PATCH(request: NextRequest) {
     }
 
     const { email } = validatedData.data;
-
     await connectToDatabase();
 
     const user = await User.findOne({ email });
-
     if (!user) {
       return NextResponse.json(
         {
@@ -43,7 +41,7 @@ export async function PATCH(request: NextRequest) {
 
     await sendEmail({
       emailAddress: email,
-      emailSubject: 'DEVKIT - OTP for Password Reset',
+      emailSubject: 'DevKit - OTP for Password Reset',
       htmlText: resetPasswordHtml(otp),
     });
 
@@ -54,9 +52,12 @@ export async function PATCH(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error during forgot password process:', error);
+    // console.error('Error during forgot password process:', error);
     return NextResponse.json(
-      { error: 'Forgot password process failed!' },
+      {
+        error: 'Forgot password process failed!',
+        details: error,
+      },
       { status: 500 }
     );
   }
