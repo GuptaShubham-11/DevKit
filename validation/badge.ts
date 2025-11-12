@@ -129,3 +129,16 @@ export const awardBadgeSchema = z.object({
     .optional(),
   overrideCriteria: z.boolean().optional(), // Allow admin to override eligibility
 });
+
+export const deleteBadgeSchema = z.object({
+  badgeId: z.string(),
+});
+
+export type GetBadgesSchemaType = z.infer<typeof getBadgesSchema>;
+export type CreateBadgeSchemaType = z.infer<typeof createBadgeSchema>;
+export type UpdateBadgeSchemaType = z.infer<typeof updateBadgeSchema>;
+export type CheckBadgeProgressSchemaType = z.infer<
+  typeof checkBadgeProgressSchema
+>;
+export type AwardBadgeSchemaType = z.infer<typeof awardBadgeSchema>;
+export type DeleteBadgeSchemaType = z.infer<typeof deleteBadgeSchema>;
