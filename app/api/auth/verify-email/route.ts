@@ -1,31 +1,23 @@
-import { connectToDatabase } from '@/lib/db';
-import { Notification } from '@/models/notification';
 import { User } from '@/models/user';
+import { connectToDatabase } from '@/lib/db';
 import { verifyOtpSchema } from '@/validation/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function PATCH(request: NextRequest) {
   try {
-    const reqData = await request.json().catch(() => null);
+    const reqData = await request.json();
 
-    if (!reqData) {
-      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-    }
-
-    // Validate input
-    const parsed = verifyOtpSchema.safeParse(reqData);
-
-    if (!parsed.success) {
+    // Validate
+    const validatedData = verifyOtpSchema.safeParse(reqData);
+    if (!validatedData.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0].message },
+        { error: validatedData.error.issues[0].message },
         { status: 400 }
       );
     }
-    const { email, otp } = parsed.data;
-
+    const { email, otp } = validatedData.data;
     await connectToDatabase();
 
-    // Lookup user
     const user = await User.findOne({ email });
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -65,21 +57,17 @@ export async function PATCH(request: NextRequest) {
     user.emailVerifiedAt = now;
     await user.save({ validateBeforeSave: false });
 
-    await Notification.create({
-      userId: user.id,
-      type: 'welcome',
-      title: 'Welcome to DevKit!',
-      message: 'Welcome to DevKit! Your email has been verified.',
-    });
-
     return NextResponse.json(
       { message: 'Email verified successfully' },
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error verifying email:', error);
+    // console.error('Error verifying email:', error);
     return NextResponse.json(
-      { error: 'Failed to verify email!' },
+      {
+        error: 'Failed to verify email!',
+        details: error,
+      },
       { status: 400 }
     );
   }
