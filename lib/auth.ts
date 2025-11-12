@@ -1,12 +1,16 @@
-import { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import GoogleProvider from 'next-auth/providers/google';
-import { connectToDatabase } from './db';
 import { User } from '@/models/user';
+import { connectToDatabase } from './db';
+import { NextAuthOptions } from 'next-auth';
 import { loginSchema } from '@/validation/auth';
+import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
   throw new Error('GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET must be set');
+}
+
+if (!process.env.NEXTAUTH_SECRET) {
+  throw new Error('NEXTAUTH_SECRET must be set');
 }
 
 export const authOptions: NextAuthOptions = {
@@ -18,21 +22,18 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        // Validate presence
         if (!credentials?.email || !credentials.password) {
           throw new Error('Email and password are required');
         }
 
-        // Validate format
-        const parsed = loginSchema.safeParse(credentials);
-        if (!parsed.success) {
-          throw new Error(parsed.error.issues[0].message);
+        // Validate
+        const validatedData = loginSchema.safeParse(credentials);
+        if (!validatedData.success) {
+          throw new Error(validatedData.error.issues[0].message);
         }
-        const { email, password } = parsed.data;
-
+        const { email, password } = validatedData.data;
         await connectToDatabase();
 
-        // Case-insensitive lookup
         const user = await User.findOne({ email });
         if (!user) {
           throw new Error('Invalid email or password');
