@@ -1,5 +1,5 @@
-import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/user';
+import { connectToDatabase } from '@/lib/db';
 import { usernameSchema } from '@/validation/auth';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -9,21 +9,20 @@ export async function GET(request: NextRequest) {
 
     if (!usernameParam) {
       return NextResponse.json(
-        { error: 'Username query parameter is required.' },
+        { erroror: 'Username query parameter is required.' },
         { status: 400 }
       );
     }
 
     // Validate and normalize username
-    const parsed = usernameSchema.safeParse(usernameParam);
-    if (!parsed.success) {
+    const validatedData = usernameSchema.safeParse(usernameParam);
+    if (!validatedData.success) {
       return NextResponse.json(
-        { error: parsed.error.issues[0].message },
+        { erroror: validatedData.error.issues[0].message },
         { status: 400 }
       );
     }
-    const username = parsed.data;
-
+    const username = validatedData.data;
     await connectToDatabase();
 
     // Case-insensitive lookup
@@ -36,8 +35,8 @@ export async function GET(request: NextRequest) {
 
     if (existingUser) {
       return NextResponse.json(
-        { available: false, error: 'Username already taken.' },
-        { status: 409 }
+        { available: false, message: 'Username already taken.' },
+        { status: 200 }
       );
     }
 
@@ -45,10 +44,13 @@ export async function GET(request: NextRequest) {
       { available: true, message: 'Username is available.' },
       { status: 200 }
     );
-  } catch (err) {
-    console.error('Error checking username:', err);
+  } catch (error) {
+    // console.error('Error checking username:', error);
     return NextResponse.json(
-      { error: 'Failed to check username availability.' },
+      {
+        error: 'Failed to check username availability.',
+        details: error,
+      },
       { status: 500 }
     );
   }
