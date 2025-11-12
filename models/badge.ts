@@ -1,37 +1,12 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { Badge as SharedBadge } from '@/types/shared/badge';
 
-export interface IBadge extends Document {
+export interface IBadge
+  extends Document,
+    Omit<SharedBadge, '_id' | 'createdAt' | 'updatedAt'> {
   _id: mongoose.Types.ObjectId;
-  name: string;
-  description: string;
-  badgeImage: string;
-  criteria: {
-    type: string;
-    condition: string;
-    value: number;
-    timeframe?: string;
-    additionalConditions?: any;
-  };
-  pointsRequired: number;
-  rarityLevel: 'common' | 'rare' | 'epic' | 'legendary';
-  rewardData: {
-    xpBonus?: number;
-    profileBadge?: boolean;
-    specialPrivileges?: string[];
-  };
-  isActive: boolean;
-  category:
-    | 'general'
-    | 'creator'
-    | 'community'
-    | 'usage'
-    | 'milestone'
-    | 'special'
-    | 'seasonal'
-    | 'achievement';
   createdAt: Date;
   updatedAt: Date;
-  __v?: number;
 }
 
 const badgeSchema = new Schema<IBadge>(
