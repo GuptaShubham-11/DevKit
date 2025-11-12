@@ -1,9 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { Badge } from '@/models/badge';
+import { authOptions } from '@/lib/auth';
 import { getServerSession } from 'next-auth';
 import { connectToDatabase } from '@/lib/db';
-import { Badge } from '@/models/badge';
 import { createBadgeSchema } from '@/validation/badge';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
 import { checkUserIsAdmin } from '@/lib/checkUserIsAdmin';
 
 export async function POST(request: NextRequest) {
@@ -98,9 +98,12 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating badge:', error);
+    // console.error('Error creating badge:', error);
     return NextResponse.json(
-      { error: 'Failed to create badge' },
+      {
+        error: 'Failed to create badge',
+        details: error,
+      },
       { status: 500 }
     );
   }
