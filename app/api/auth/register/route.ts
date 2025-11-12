@@ -1,28 +1,24 @@
-import { connectToDatabase } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
 import { User } from '@/models/user';
-import { registerSchema } from '@/validation/auth';
 import { sendEmail } from '@/lib/email';
-import { emailVerificationHtml } from '@/emails/emailVerification';
+import { connectToDatabase } from '@/lib/db';
 import { generateOtp } from '@/lib/generateOtp';
+import { registerSchema } from '@/validation/auth';
+import { NextRequest, NextResponse } from 'next/server';
+import { emailVerificationHtml } from '@/emails/emailVerification';
 
 export async function POST(request: NextRequest) {
-  const reqData = await request.json().catch(() => null);
-  if (!reqData) {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
-  }
-
-  const parsed = registerSchema.safeParse(reqData);
-  if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0].message },
-      { status: 400 }
-    );
-  }
-
-  const { email, username, password } = parsed.data;
-
   try {
+    const reqData = await request.json();
+
+    const validatedData = registerSchema.safeParse(reqData);
+    if (!validatedData.success) {
+      return NextResponse.json(
+        { error: validatedData.error.issues[0].message },
+        { status: 400 }
+      );
+    }
+
+    const { email, username, password } = validatedData.data;
     await connectToDatabase();
 
     const existing = await User.findOne({
@@ -63,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     sendEmail({
       emailAddress: email.toLowerCase(),
-      emailSubject: 'DEVKIT - Verify Your Account',
+      emailSubject: 'DevKit - Verify Your Account',
       htmlText: emailVerificationHtml(otp),
     });
 
@@ -71,10 +67,13 @@ export async function POST(request: NextRequest) {
       { message: 'Verification code sent to your email.' },
       { status: 200 }
     );
-  } catch (err) {
-    console.error('Registration error:', err);
+  } catch (error) {
+    // console.error('Registration error:', err);
     return NextResponse.json(
-      { error: 'Registration failed. Please try again.' },
+      {
+        error: 'Registration failed. Please try again.',
+        details: error,
+      },
       { status: 500 }
     );
   }
