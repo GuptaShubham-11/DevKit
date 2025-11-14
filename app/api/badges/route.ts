@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectToDatabase } from '@/lib/db';
 import { Badge, IBadge } from '@/models/badge';
-import { IUserStats, UserStats } from '@/models/userStats';
-import { IUserBadge, UserBadge } from '@/models/userBadge';
+import { UserStats } from '@/models/userStats';
+import { UserBadge } from '@/models/userBadge';
 import { getBadgesSchema } from '@/validation/badge';
+import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
@@ -130,9 +130,12 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching badges:', error);
+    // console.error('Error fetching badges:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch badges' },
+      {
+        error: 'Failed to fetch badges',
+        details: error,
+      },
       { status: 500 }
     );
   }
@@ -204,8 +207,8 @@ async function getUserBadgeProgress(userId: string) {
         targetValue: badge.criteria.value,
       };
     });
-  } catch (error) {
-    console.error('Error calculating badge progress:', error);
+  } catch {
+    // console.error('Error calculating badge progress:', error);
     return [];
   }
 }
