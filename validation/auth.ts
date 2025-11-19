@@ -81,15 +81,13 @@ export const verifyOtpSchema = z.object({
     .trim(),
 });
 
-export const usernameSchema = z.object({
-  username: z
-    .string()
-    .min(3, 'Username must be at least 3 characters')
-    .max(20, 'Username must be at most 20 characters')
-    .regex(usernamePattern, 'Username can only contain letters and numbers')
-    .toLowerCase()
-    .trim(),
-});
+export const usernameSchema = z
+  .string()
+  .min(3, 'Username must be at least 3 characters')
+  .max(20, 'Username must be at most 20 characters')
+  .regex(usernamePattern, 'Username can only contain letters and numbers')
+  .toLowerCase()
+  .trim();
 
 // Password Reset
 export const resetPasswordSchema = z.object({
