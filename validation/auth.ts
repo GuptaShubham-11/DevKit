@@ -62,6 +62,7 @@ export const requestOtpSchema = z.object({
     .regex(emailPattern, 'Invalid email address')
     .toLowerCase()
     .trim(),
+  type: z.enum(['register', 'resetPassword']),
 });
 
 // OTP Verification
