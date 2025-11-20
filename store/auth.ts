@@ -261,7 +261,7 @@ const useAuthStore = create<AuthState>()(
             setError('verifyOtp', null);
 
             try {
-              await axios.patch('/api/auth/verify-otp', {
+              await axios.patch('/api/auth/verify-email', {
                 email: normalize(email),
                 otp,
               });
