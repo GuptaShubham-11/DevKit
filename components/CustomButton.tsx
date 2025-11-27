@@ -15,7 +15,7 @@ type ButtonType = 'button' | 'submit' | 'reset';
 interface CustomButtonProps {
   icon?: React.ComponentType<{ className?: string }>;
   label?: string;
-  onClick: () => void;
+  onClick?: () => void;
   variant?: ButtonVariant;
   shortcut?: string;
   className?: string;
