@@ -11,7 +11,7 @@ export function resetPasswordHtml(otp: string) {
 
         <div style="text-align: center; margin: 20px 0;">
           <div style="display: inline-block; padding: 12px 20px; background-color: #f0f0f0; border-radius: 4px; border: 1px solid #2563eb;">
-            <span style="font-size: 20px; font-weight: bold; color: #2563eb; letter-spacing: 4px;">398726</span>
+            <span style="font-size: 20px; font-weight: bold; color: #2563eb; letter-spacing: 4px;">${otp}</span>
           </div>
         </div>
 
