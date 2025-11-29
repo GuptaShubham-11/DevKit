@@ -134,11 +134,9 @@ export const deleteBadgeSchema = z.object({
   badgeId: z.string(),
 });
 
-export type GetBadgesSchemaType = z.infer<typeof getBadgesSchema>;
-export type CreateBadgeSchemaType = z.infer<typeof createBadgeSchema>;
-export type UpdateBadgeSchemaType = z.infer<typeof updateBadgeSchema>;
-export type CheckBadgeProgressSchemaType = z.infer<
-  typeof checkBadgeProgressSchema
->;
-export type AwardBadgeSchemaType = z.infer<typeof awardBadgeSchema>;
-export type DeleteBadgeSchemaType = z.infer<typeof deleteBadgeSchema>;
+export type GetBadgesSchema = z.infer<typeof getBadgesSchema>;
+export type CreateBadgeSchema = z.infer<typeof createBadgeSchema>;
+export type UpdateBadgeSchema = z.infer<typeof updateBadgeSchema>;
+export type CheckBadgeProgressSchema = z.infer<typeof checkBadgeProgressSchema>;
+export type AwardBadgeSchema = z.infer<typeof awardBadgeSchema>;
+export type DeleteBadgeSchema = z.infer<typeof deleteBadgeSchema>;
