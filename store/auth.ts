@@ -115,7 +115,7 @@ const getAxiosErrorMessage = (error: unknown, fallback: string): string => {
 
 const useAuthStore = create<AuthState>()(
   devtools(
-    subscribeWithSelector((set, get) => {
+    subscribeWithSelector((set) => {
       const setLoading = <K extends keyof LoadingState>(
         key: K,
         value: boolean
@@ -388,14 +388,17 @@ const useAuthStore = create<AuthState>()(
               }));
 
               return usernameCheck;
-            } catch (error) {
+            } catch (error: any) {
               const errorMessage = getAxiosErrorMessage(
                 error,
                 'Failed to check username'
               );
 
+              toast.error(errorMessage);
+              const usernameCheck = error?.response?.data;
+
               set((state) => ({
-                usernameCheck: null,
+                usernameCheck,
                 loading: {
                   ...state.loading,
                   checkingUsername: false,
@@ -520,6 +523,8 @@ export const useResetPassword = () =>
   useAuthStore((state) => state.actions.resetPassword);
 export const useCheckUsername = () =>
   useAuthStore((state) => state.actions.checkUsername);
+export const useClearUsernameCheck = () =>
+  useAuthStore((state) => state.actions.clearUsernameCheck);
 export const useSuggestUsernames = () =>
   useAuthStore((state) => state.actions.suggestUsernames);
 
