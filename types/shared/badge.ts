@@ -4,10 +4,15 @@ export interface Badge {
   description: string;
   badgeImage: string;
   criteria: {
-    type: string;
-    condition: string;
+    type:
+      | 'templatesCreated'
+      | 'copiesReceived'
+      | 'commandsGenerated'
+      | 'likesReceived'
+      | 'communityHelper';
+    condition: 'gte' | 'lte' | 'eq' | 'between';
     value: number;
-    timeframe?: string;
+    timeframe?: 'allTime' | '30Days' | '7Days' | '1Day';
     additionalConditions?: any;
   };
   pointsRequired: number;
