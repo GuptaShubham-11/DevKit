@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const getBadgesSchema = z.object({
   category: z
     .enum([
+      'general',
       'creator',
       'community',
       'usage',
@@ -101,6 +102,7 @@ export const createBadgeSchema = z.object({
     .optional(),
   category: z
     .enum([
+      'general',
       'creator',
       'community',
       'usage',
@@ -109,6 +111,7 @@ export const createBadgeSchema = z.object({
       'seasonal',
       'achievement',
     ])
+    .default('general')
     .optional(),
 });
 
@@ -134,9 +137,9 @@ export const deleteBadgeSchema = z.object({
   badgeId: z.string(),
 });
 
-export type GetBadgesSchema = z.infer<typeof getBadgesSchema>;
-export type CreateBadgeSchema = z.infer<typeof createBadgeSchema>;
-export type UpdateBadgeSchema = z.infer<typeof updateBadgeSchema>;
-export type CheckBadgeProgressSchema = z.infer<typeof checkBadgeProgressSchema>;
-export type AwardBadgeSchema = z.infer<typeof awardBadgeSchema>;
-export type DeleteBadgeSchema = z.infer<typeof deleteBadgeSchema>;
+export type GetBadgesData = z.infer<typeof getBadgesSchema>;
+export type CreateBadgeData = z.input<typeof createBadgeSchema>;
+export type UpdateBadgeData = z.input<typeof updateBadgeSchema>;
+export type CheckBadgeProgressData = z.infer<typeof checkBadgeProgressSchema>;
+export type AwardBadgeData = z.infer<typeof awardBadgeSchema>;
+export type DeleteBadgeData = z.input<typeof deleteBadgeSchema>;
