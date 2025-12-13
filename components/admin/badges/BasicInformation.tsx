@@ -1,7 +1,13 @@
+import { useEffect } from 'react';
 import { NotepadText, Pencil } from 'lucide-react';
-import { Control, FieldPath, FieldValues } from 'react-hook-form';
+import { FieldPath, FieldValues } from 'react-hook-form';
 import { LabelInput } from '@/components/LabelInput';
 import { UploadArea } from '@/components/UploadArea';
+
+import {
+  BasicFormFields,
+  BasicInformationProps,
+} from '@/types/small-types/badge';
 
 import {
   FormControl,
@@ -11,40 +17,22 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-type BasicFormFields = {
-  name: string;
-  description: string;
-  badgeImage: string;
-};
-
-interface BasicInformationProps<
-  TFieldValues extends FieldValues = BasicFormFields,
-> {
-  form: {
-    control: Control<TFieldValues>;
-  };
-  isUploading: boolean;
-  imagePreview: string;
-  uploadProgress: number;
-  setImagePreview: (preview: string) => void;
-  handleFileUpload: (file: unknown | null) => void;
-  handleFieldValidation: (
-    fieldName: FieldPath<TFieldValues>,
-    isValid: boolean
-  ) => void;
-}
-
-export const BasicInformation = <
-  TFieldValues extends FieldValues = BasicFormFields,
->({
+export const BasicInformation = <T extends FieldValues = BasicFormFields>({
   form,
+  image,
   isUploading,
   imagePreview,
   uploadProgress,
   setImagePreview,
   handleFileUpload,
   handleFieldValidation,
-}: BasicInformationProps<TFieldValues>) => {
+}: BasicInformationProps<T>) => {
+  useEffect(() => {
+    if (image && !imagePreview) {
+      setImagePreview(image);
+    }
+  }, [image, imagePreview, setImagePreview]);
+
   return (
     <>
       <div className="text-center">
@@ -59,7 +47,7 @@ export const BasicInformation = <
       {/* Name */}
       <FormField
         control={form.control}
-        name={'name' as FieldPath<TFieldValues>}
+        name={'name' as FieldPath<T>}
         render={({ field, fieldState }) => (
           <FormItem>
             <LabelInput
@@ -71,7 +59,7 @@ export const BasicInformation = <
               onChange={(e) => {
                 field.onChange(e);
                 handleFieldValidation(
-                  'name' as FieldPath<TFieldValues>,
+                  'name' as FieldPath<T>,
                   e.target.value.trim().length > 0
                 );
               }}
@@ -83,7 +71,7 @@ export const BasicInformation = <
       {/* Description */}
       <FormField
         control={form.control}
-        name={'description' as FieldPath<TFieldValues>}
+        name={'description' as FieldPath<T>}
         render={({ field, fieldState }) => (
           <FormItem>
             <LabelInput
@@ -95,7 +83,7 @@ export const BasicInformation = <
               onChange={(e) => {
                 field.onChange(e);
                 handleFieldValidation(
-                  'description' as FieldPath<TFieldValues>,
+                  'description' as FieldPath<T>,
                   e.target.value.trim().length >= 10
                 );
               }}
@@ -107,7 +95,7 @@ export const BasicInformation = <
       {/* Badge Image */}
       <FormField
         control={form.control}
-        name={'badgeImage' as FieldPath<TFieldValues>}
+        name={'badgeImage' as FieldPath<T>}
         render={({ field, fieldState }) => (
           <FormItem>
             <FormLabel className="ml-0.5 block text-[12px] font-semibold tracking-wider text-text-muted opacity-80">
@@ -124,7 +112,7 @@ export const BasicInformation = <
                   field.onChange(url);
                   handleFileUpload(res);
                   handleFieldValidation(
-                    'badgeImage' as FieldPath<TFieldValues>,
+                    'badgeImage' as FieldPath<T>,
                     Boolean(url)
                   );
                 }}
