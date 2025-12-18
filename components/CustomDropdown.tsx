@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
+import type { SelectItem as DropdownOption } from '@/types/small-types/badge';
 
 import {
   FormItem,
@@ -18,24 +19,20 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
-type IconComponent = React.ComponentType<{ className?: string; size?: number }>;
-
-interface DropdownOption {
-  value: string;
-  label: string;
-  icon?: IconComponent;
-}
-
 interface CustomDropdownProps {
-  field: any;
+  field: {
+    name: string;
+    value: string;
+    onChange: (value: string) => void;
+    onBlur?: () => void;
+  };
   error?: FieldError;
-  options: DropdownOption[];
+  options: DropdownOption;
   label?: string;
   placeholder?: string;
   className?: string;
   triggerClassName?: string;
   contentClassName?: string;
-  iconPosition?: 'left' | 'right';
   getIconColor?: (value: string) => {
     bg?: string;
     text?: string;
@@ -52,13 +49,11 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   className = '',
   triggerClassName = '',
   contentClassName = '',
-  iconPosition = 'left',
   getIconColor,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const selectedOption = options.find((option) => option.value === field.value);
-
-  const iconColor = (value: string) => getIconColor?.(value)?.text ?? '';
+  const iconColor = (value: string): string =>
+    getIconColor?.(value)?.text ?? '';
 
   return (
     <FormItem className={`w-full ${className}`}>
@@ -70,7 +65,7 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
 
       <Select
         onValueChange={field.onChange}
-        value={field.value}
+        value={field.value ?? ''}
         onOpenChange={setIsOpen}
       >
         <FormControl>
@@ -78,10 +73,10 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
             <SelectTrigger
               className={`
                 relative flex w-full items-center justify-between gap-2 rounded
-                focus:shadow-[0_0_20px_rgba(99,102,241,0.1)]
                 border border-border-color bg-surface-secondary/30
                 py-4 px-4 text-text-primary transition-colors duration-300
                 hover:border-white/10 hover:bg-surface-secondary/50
+                focus:shadow-[0_0_20px_rgba(99,102,241,0.1)]
                 ${triggerClassName}
               `}
             >
@@ -97,23 +92,9 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 className="pointer-events-none absolute right-0 top-0 h-2 w-2 border-r border-t border-text-primary"
               />
 
-              <div className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-                {/* {iconPosition === 'left' && selectedOption?.icon && (
-                  <selectedOption.icon
-                    size={18}
-                    className={iconColor(selectedOption.value)}
-                  />
-                )} */}
-
+              <span className="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
                 <SelectValue placeholder={placeholder} className="truncate" />
-
-                {iconPosition === 'right' && selectedOption?.icon && (
-                  <selectedOption.icon
-                    size={18}
-                    className={iconColor(selectedOption.value)}
-                  />
-                )}
-              </div>
+              </span>
 
               <motion.div
                 animate={{ rotate: isOpen ? 180 : 0 }}
