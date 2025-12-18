@@ -55,3 +55,13 @@ export interface RewardProps<T extends BadgeFormType> {
   removeSpecialPrivilege: (index: number) => void;
   updateSpecialPrivilege: (index: number, value: string) => void;
 }
+
+// Select item props
+export type SelectItem = {
+  value: string;
+  label: string;
+  icon: React.ElementType;
+}[];
+
+// Keyword Colors
+export type ColorBasedOnKeyword = { bg: string; color?: string; text: string };
