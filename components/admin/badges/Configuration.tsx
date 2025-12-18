@@ -1,35 +1,29 @@
-import { UseFormReturn, FieldPath } from 'react-hook-form';
-import { CreateBadgeData } from '@/validation/badge';
+import { FieldPath } from 'react-hook-form';
+import { LabelInput } from '@/components/LabelInput';
 import { Separator } from '@/components/ui/separator';
 import { CustomDropdown } from '@/components/CustomDropdown';
 import { FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { LabelInput } from '@/components/LabelInput';
+import { BadgeFormType, ConfigurationProps } from '@/types/small-types/badge';
+
 import {
+  categoryColor,
   categoryOptions,
+  conditionColor,
   conditionOptions,
+  criteriaColor,
   criteriaTypeOptions,
-  getCategoryColor,
-  getConditionColor,
-  getCriteriaColor,
-  getRarityColor,
-  getTimeframeColor,
+  rarityColor,
   rarityOptions,
+  timeframeColor,
   timeframeOptions,
-} from '@/lib/smallUtils';
+} from '@/lib/small-utils/badge';
 
-export interface ConfigurationProps {
-  criteriaCondition: string;
-  betweenValues: [number, number];
-  form: UseFormReturn<CreateBadgeData>;
-  setBetweenValues: (values: [number, number]) => void;
-}
-
-export const Configuration: React.FC<ConfigurationProps> = ({
+export function Configuration<T extends BadgeFormType>({
   form,
   betweenValues,
   setBetweenValues,
   criteriaCondition,
-}) => {
+}: ConfigurationProps<T>) {
   const handleBetweenChange = (index: 0 | 1, raw: string) => {
     const parsed = Number.parseInt(raw, 10);
     const safeValue = Number.isNaN(parsed) ? 1 : parsed;
@@ -47,30 +41,28 @@ export const Configuration: React.FC<ConfigurationProps> = ({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField
           control={form.control}
-          name={'category' as FieldPath<CreateBadgeData>}
+          name={'category' as FieldPath<T>}
           render={({ field }) => (
             <CustomDropdown
               field={field}
               options={categoryOptions}
               label="Category"
               placeholder="Select category"
-              iconPosition="left"
-              getIconColor={getCategoryColor}
+              getIconColor={categoryColor}
             />
           )}
         />
 
         <FormField
           control={form.control}
-          name={'rarityLevel' as FieldPath<CreateBadgeData>}
+          name={'rarityLevel' as FieldPath<T>}
           render={({ field }) => (
             <CustomDropdown
               field={field}
               options={rarityOptions}
               label="Rarity Level"
               placeholder="Select rarity"
-              iconPosition="left"
-              getIconColor={getRarityColor}
+              getIconColor={rarityColor}
             />
           )}
         />
@@ -92,30 +84,28 @@ export const Configuration: React.FC<ConfigurationProps> = ({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <FormField
             control={form.control}
-            name={'criteria.type' as FieldPath<CreateBadgeData>}
+            name={'criteria.type' as FieldPath<T>}
             render={({ field }) => (
               <CustomDropdown
                 field={field}
                 options={criteriaTypeOptions}
                 label="What to Track"
                 placeholder="Select criteria"
-                iconPosition="left"
-                getIconColor={getCriteriaColor}
+                getIconColor={criteriaColor}
               />
             )}
           />
 
           <FormField
             control={form.control}
-            name={'criteria.condition' as FieldPath<CreateBadgeData>}
+            name={'criteria.condition' as FieldPath<T>}
             render={({ field }) => (
               <CustomDropdown
                 field={field}
                 options={conditionOptions}
                 label="Condition"
                 placeholder="Select condition"
-                iconPosition="left"
-                getIconColor={getConditionColor}
+                getIconColor={conditionColor}
               />
             )}
           />
@@ -152,28 +142,33 @@ export const Configuration: React.FC<ConfigurationProps> = ({
           <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
-              name={'criteria.timeframe' as FieldPath<CreateBadgeData>}
+              name={'criteria.timeframe' as FieldPath<T>}
               render={({ field }) => (
                 <CustomDropdown
                   field={field}
                   options={timeframeOptions}
                   label="Timeframe"
                   placeholder="Select timeframe"
-                  iconPosition="left"
-                  getIconColor={getTimeframeColor}
+                  getIconColor={timeframeColor}
                 />
               )}
             />
 
             <FormField
               control={form.control}
-              name={'criteria.value' as FieldPath<CreateBadgeData>}
+              name={'criteria.value' as FieldPath<T>}
               render={({ field }) => (
                 <FormItem>
                   <LabelInput
                     label="Target Value"
                     type="number"
-                    error={form.formState.errors.criteria?.value?.message}
+                    error={
+                      form.formState.errors.criteria &&
+                      'value' in form.formState.errors.criteria
+                        ? (form.formState.errors.criteria.value
+                            ?.message as string)
+                        : undefined
+                    }
                     value={field.value?.toString() ?? ''}
                     onChange={(e) => {
                       const parsed = Number.parseInt(e.target.value, 10);
@@ -189,4 +184,4 @@ export const Configuration: React.FC<ConfigurationProps> = ({
       </div>
     </>
   );
-};
+}
