@@ -66,12 +66,12 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
                   size-8 rounded-full border-2 flex items-center justify-center
                   text-sm md:text-base transition-all
                   ${style.bg} ${style.border} ${style.text}
-                  ${isClickable ? 'cursor-pointer hover:scale-105' : 'cursor-default'}
+                  ${isClickable ? 'cursor-pointer' : 'cursor-default'}
                 `}
               >
                 {status === 'completed' && (
                   <motion.div
-                    initial={{ scale: 0 }}
+                    initial={false}
                     animate={{ scale: 1 }}
                     transition={{ type: 'spring', stiffness: 180 }}
                   >
@@ -102,7 +102,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
                         ? 'bg-accent-success'
                         : 'bg-surface-secondary'
                     }`}
-                    initial={{ width: 0 }}
+                    initial={false}
                     animate={{ width: '100%' }}
                     transition={{ duration: 0.3 }}
                   />
@@ -150,7 +150,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
       <div className="h-2 w-full overflow-hidden rounded-full bg-border-color/40">
         <motion.div
           className="h-full bg-accent-success rounded-full"
-          initial={{ width: 0 }}
+          initial={false}
           animate={{ width: `${progress}%` }}
           transition={{ duration: 0.7, ease: 'easeOut' }}
         />
