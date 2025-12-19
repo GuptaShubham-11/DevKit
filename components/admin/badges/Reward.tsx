@@ -1,13 +1,13 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { UseFormReturn } from 'react-hook-form';
-import { CreateBadgeData } from '@/validation/badge';
+import { FieldPath } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
-import { rarityConfig } from '@/lib/smallUtils';
 import { Button } from '@/components/ui/button';
 import { LabelInput } from '@/components/LabelInput';
 import { Separator } from '@/components/ui/separator';
 import CustomButton from '@/components/CustomButton';
+import { rarityConfig } from '@/lib/small-utils/badge';
+import { BadgeFormType, RewardProps } from '@/types/small-types/badge';
 
 import {
   ChevronDown,
@@ -32,18 +32,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-interface RewardProps {
-  form: UseFormReturn<CreateBadgeData>;
-  rarityLevel: string;
-  isPrivilegesOpen: boolean;
-  specialPrivileges: string[];
-  addSpecialPrivilege: () => void;
-  setIsPrivilegesOpen: (value: boolean) => void;
-  removeSpecialPrivilege: (index: number) => void;
-  updateSpecialPrivilege: (index: number, value: string) => void;
-}
-
-export const Reward: React.FC<RewardProps> = ({
+export function Reward<T extends BadgeFormType>({
   form,
   rarityLevel,
   isPrivilegesOpen,
@@ -52,7 +41,7 @@ export const Reward: React.FC<RewardProps> = ({
   setIsPrivilegesOpen,
   removeSpecialPrivilege,
   updateSpecialPrivilege,
-}) => {
+}: RewardProps<T>) {
   const rarity = rarityConfig[rarityLevel];
 
   const parseNumber = (raw: string, fallback = 0) => {
@@ -75,14 +64,14 @@ export const Reward: React.FC<RewardProps> = ({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField
           control={form.control}
-          name="pointsRequired"
+          name={'pointsRequired' as FieldPath<T>}
           render={({ field }) => (
             <FormItem>
               <LabelInput
                 label="Points"
                 placeholder="30"
                 iconLeft={Coins}
-                error={form.formState.errors.pointsRequired?.message}
+                error={form.formState.errors.pointsRequired?.message as string}
                 type="number"
                 value={field.value?.toString() ?? ''}
                 onChange={(e) => field.onChange(parseNumber(e.target.value, 0))}
@@ -100,14 +89,14 @@ export const Reward: React.FC<RewardProps> = ({
 
         <FormField
           control={form.control}
-          name="rewardData.xpBonus"
+          name={'rewardData.xpBonus' as FieldPath<T>}
           render={({ field }) => (
             <FormItem>
               <LabelInput
                 label="XP"
                 placeholder="30"
                 iconLeft={TrendingUp}
-                error={form.formState.errors.rewardData?.xpBonus?.message}
+                // error={form.formState.errors.rewardData?.xpBonus?.message}
                 type="number"
                 value={field.value?.toString() ?? ''}
                 onChange={(e) => field.onChange(parseNumber(e.target.value, 0))}
@@ -151,7 +140,7 @@ export const Reward: React.FC<RewardProps> = ({
               type="button"
               onClick={addSpecialPrivilege}
               label="Add"
-              variant="secondary"
+              variant="primary"
               className="max-w-2"
             />
           </div>
@@ -160,7 +149,7 @@ export const Reward: React.FC<RewardProps> = ({
             <AnimatePresence initial={false}>
               {specialPrivileges.map((privilege, index) => (
                 <motion.div
-                  key={`${privilege}-${index}`}
+                  key={index}
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
@@ -196,7 +185,7 @@ export const Reward: React.FC<RewardProps> = ({
       <div className="space-y-4">
         <FormField
           control={form.control}
-          name="rewardData.profileBadge"
+          name={'rewardData.profileBadge' as FieldPath<T>}
           render={({ field }) => (
             <FormItem className="flex items-center justify-between rounded-[2px] border border-border-color bg-surface-secondary/30 p-4">
               <div>
@@ -220,7 +209,7 @@ export const Reward: React.FC<RewardProps> = ({
 
         <FormField
           control={form.control}
-          name="isActive"
+          name={'isActive' as FieldPath<T>}
           render={({ field }) => (
             <FormItem className="flex items-center justify-between rounded-[2px] border border-border-color bg-surface-secondary/30 p-4">
               <div>
@@ -244,4 +233,4 @@ export const Reward: React.FC<RewardProps> = ({
       </div>
     </>
   );
-};
+}
