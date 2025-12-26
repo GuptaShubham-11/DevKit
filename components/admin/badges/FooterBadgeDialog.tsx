@@ -39,7 +39,7 @@ export function FooterBadgeDialog({
           type="button"
           variant="primary"
           onClick={handleSubmit}
-          label="Create Badge"
+          label="Submit"
           disabled={loading || !isFormValid || isUploading}
           loading={loading}
           shimmer
