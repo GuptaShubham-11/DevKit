@@ -15,6 +15,13 @@ export interface UploadedFile {
   [key: string]: unknown;
 }
 
+// BadgeDialog Props
+export interface BadgeDialogProps {
+  badge?: BadgeFormType | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
 // BasicInformation Props
 export type BasicFormFields = Pick<
   BadgeFormType,
@@ -65,3 +72,18 @@ export type SelectItem = {
 
 // Keyword Colors
 export type ColorBasedOnKeyword = { bg: string; color?: string; text: string };
+
+// SpecialPrivileges Props
+export interface UseSpecialPrivilegesProps<T extends BadgeFormType> {
+  form: UseFormReturn<T>;
+  specialPrivileges: string[];
+  setIsPrivilegesOpen: (value: boolean) => void;
+}
+
+// Procced Props
+export type useProceedProps = {
+  currentStep: number;
+  isUploading: boolean;
+  uploadedFile: UploadedFile | null;
+  watchedValues: BadgeFormType;
+};
