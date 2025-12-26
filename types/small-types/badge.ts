@@ -1,4 +1,5 @@
 import { CreateBadgeData, UpdateBadgeData } from '@/validation/badge';
+import { Badge } from '../shared/badge';
 import {
   Control,
   FieldPath,
@@ -17,7 +18,7 @@ export interface UploadedFile {
 
 // BadgeDialog Props
 export interface BadgeDialogProps {
-  badge?: BadgeFormType | null;
+  badge?: Badge | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
