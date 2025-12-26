@@ -87,3 +87,17 @@ export type useProceedProps = {
   uploadedFile: UploadedFile | null;
   watchedValues: BadgeFormType;
 };
+
+// Footer Props
+export type FooterBadgeDialogProps = {
+  loading: boolean;
+  currentStep: number;
+  TOTAL_STEPS: number;
+  isFormValid: boolean;
+  isUploading: boolean;
+  canProceedToNextStep: boolean;
+  prevStep: () => void;
+  nextStep: () => void;
+  handleSubmit: () => void;
+  handleClose: () => void;
+};
