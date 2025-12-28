@@ -519,6 +519,12 @@ export const useUpdateBadge = () =>
   useBadgeStore((state) => state.actions.updateBadge);
 export const useDeleteBadge = () =>
   useBadgeStore((state) => state.actions.deleteBadge);
+export const useRefreshBadges = () =>
+  useBadgeStore((state) => state.actions.refreshBadges);
+export const useFetchBadges = () =>
+  useBadgeStore((state) => state.actions.fetchBadges);
+export const useLoadMoreBadges = () =>
+  useBadgeStore((state) => state.actions.loadMoreBadges);
 
 export const useFeaturedBadges = () =>
   useBadgeStore((state) => state.featuredBadges);
