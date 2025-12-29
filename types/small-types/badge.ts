@@ -102,3 +102,31 @@ export type FooterBadgeDialogProps = {
   handleSubmit: () => void;
   handleClose: () => void;
 };
+
+//  Stats Data Props
+export type StatData = {
+  label: string;
+  value: number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  bgColor: string;
+  description: string;
+};
+
+// Category Dot Props
+export type CategoryDotProps = {
+  category: string;
+  count: number;
+  percentage: number;
+  x: number;
+  y: number;
+  color: string;
+};
+
+// Tooltip Props
+export type TooltipProps = {
+  active?: boolean;
+  payload?: {
+    [key: string]: any;
+  };
+};
