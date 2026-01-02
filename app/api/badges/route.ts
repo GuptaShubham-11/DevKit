@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
       offset = 0,
       sort = 'rarity',
       order = 'asc',
+      search,
     } = validatedQuery.data;
 
     await connectToDatabase();
@@ -38,6 +39,12 @@ export async function GET(request: NextRequest) {
     if (category) conditions.category = category;
     if (rarity) conditions.rarityLevel = rarity;
     if (!includeInactive) conditions.isActive = true;
+    if (search) {
+      conditions.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
+    }
 
     // Build sort object
     const sortObj: any = {};
