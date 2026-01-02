@@ -33,6 +33,7 @@ export const getBadgesSchema = z.object({
     .optional(),
   sort: z.enum(['rarity', 'category', 'createdAt', 'name']).optional(),
   order: z.enum(['asc', 'desc']).optional(),
+  search: z.string().max(100).optional(),
 });
 
 export const createBadgeSchema = z.object({
