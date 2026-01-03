@@ -26,6 +26,8 @@ import {
   Watch,
 } from 'lucide-react';
 import { ColorBasedOnKeyword, SelectItem } from '@/types/small-types/badge';
+import { Query } from '@/store/badge';
+import { FilterGroup } from '@/types/small-types/searchBar';
 
 export const steps: Step[] = [
   {
@@ -410,3 +412,160 @@ export const conditionToSymbol = (condition: string) => {
   };
   return conditions[condition] || '';
 };
+
+export const defaultQueryConvertIntoStringPair = (query: Query) => {
+  const stringQuery = {} as Record<string, string | string[]>;
+  Object.entries(query).forEach(([key, value]) => {
+    if (value !== undefined && value !== null) {
+      stringQuery[key] = String(value);
+    }
+  });
+  return stringQuery;
+};
+
+export const sortColor = (sort: string): ColorBasedOnKeyword => {
+  switch (sort) {
+    case 'name':
+      return {
+        bg: 'bg-[#14B8B6]/10',
+        color: '#14B8B6',
+        text: 'text-[#14B8B6]',
+      };
+    case 'createdAt':
+      return {
+        bg: 'bg-[#6366F1]/10',
+        color: '#6366F1',
+        text: 'text-[#6366F1]',
+      };
+    case 'rarity':
+      return {
+        bg: 'bg-[#F97316]/10',
+        color: '#F97316',
+        text: 'text-[#F97316]',
+      };
+    case 'category':
+      return {
+        bg: 'bg-[#10B981]/10',
+        color: '#10B981',
+        text: 'text-[#10B981]',
+      };
+    case 'earnedBy':
+      return {
+        bg: 'bg-[#EC4899]/10',
+        color: '#EC4899',
+        text: 'text-[#EC4899]',
+      };
+    default:
+      return {
+        bg: 'bg-[#64748B]/10',
+        color: '#64748B',
+        text: 'text-[#64748B]',
+      };
+  }
+};
+
+export const orderColor = (order: string): ColorBasedOnKeyword => {
+  switch (order) {
+    case 'asc':
+      return {
+        bg: 'bg-[#22C55E]/10',
+        color: '#22C55E',
+        text: 'text-[#22C55E]',
+      };
+    case 'desc':
+      return {
+        bg: 'bg-[#EF4444]/10',
+        color: '#EF4444',
+        text: 'text-[#EF4444]',
+      };
+    default:
+      return {
+        bg: 'bg-[#94A3B8]/10',
+        color: '#94A3B8',
+        text: 'text-[#94A3B8]',
+      };
+  }
+};
+
+export const inactiveColor = (value: string): ColorBasedOnKeyword => {
+  if (value === 'true') {
+    return {
+      bg: 'bg-[#8B5CF6]/10',
+      color: '#8B5CF6',
+      text: 'text-[#8B5CF6]',
+    };
+  }
+  return {
+    bg: 'bg-[#0EA5E9]/10',
+    color: '#0EA5E9',
+    text: 'text-[#0EA5E9]',
+  };
+};
+
+export const filterGroups: FilterGroup[] = [
+  {
+    title: 'Category',
+    key: 'category',
+    type: 'single' as const,
+    colorDetails: categoryColor,
+    removable: true,
+    options: [
+      { type: 'category', label: 'General', value: 'general' },
+      { type: 'category', label: 'Creator', value: 'creator' },
+      { type: 'category', label: 'Community', value: 'community' },
+      { type: 'category', label: 'Usage', value: 'usage' },
+      { type: 'category', label: 'Milestone', value: 'milestone' },
+      { type: 'category', label: 'Special', value: 'special' },
+      { type: 'category', label: 'Seasonal', value: 'seasonal' },
+      { type: 'category', label: 'Achievement', value: 'achievement' },
+    ],
+  },
+  {
+    title: 'Rairty',
+    key: 'rarity',
+    type: 'single' as const,
+    colorDetails: rarityColor,
+    removable: true,
+    options: [
+      { type: 'rarity', label: 'Common', value: 'common' },
+      { type: 'rarity', label: 'Rare', value: 'rare' },
+      { type: 'rarity', label: 'Epic', value: 'epic' },
+      { type: 'rarity', label: 'Legendary', value: 'legendary' },
+    ],
+  },
+  {
+    title: 'Sort',
+    key: 'sort',
+    type: 'single' as const,
+    colorDetails: sortColor,
+    removable: false,
+    options: [
+      { type: 'sort', label: 'Name', value: 'name' },
+      { type: 'sort', label: 'Created At', value: 'createdAt' },
+      { type: 'sort', label: 'Rarity', value: 'rarity' },
+      { type: 'sort', label: 'Category', value: 'category' },
+    ],
+  },
+  {
+    title: 'Order',
+    key: 'order',
+    type: 'single' as const,
+    removable: false,
+    colorDetails: orderColor,
+    options: [
+      { type: 'order', label: 'Ascending', value: 'asc' },
+      { type: 'order', label: 'Descending', value: 'desc' },
+    ],
+  },
+  {
+    title: 'Include Inactive',
+    key: 'includeInactive',
+    type: 'single' as const,
+    colorDetails: inactiveColor,
+    removable: false,
+    options: [
+      { type: 'includeInactive', label: 'Yes', value: 'true' },
+      { type: 'includeInactive', label: 'No', value: 'false' },
+    ],
+  },
+];
