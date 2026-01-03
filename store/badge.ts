@@ -57,7 +57,7 @@ export type BadgeCategory =
 
 export type BadgeRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
 
-interface Query {
+export interface Query {
   category?: BadgeCategory;
   rarity?: BadgeRarity;
   search?: string;
@@ -525,6 +525,10 @@ export const useFetchBadges = () =>
   useBadgeStore((state) => state.actions.fetchBadges);
 export const useLoadMoreBadges = () =>
   useBadgeStore((state) => state.actions.loadMoreBadges);
+export const useSetQuery = () =>
+  useBadgeStore((state) => state.actions.setQuery);
+export const useResetQuery = () =>
+  useBadgeStore((state) => state.actions.resetQuery);
 
 export const useFeaturedBadges = () =>
   useBadgeStore((state) => state.featuredBadges);
