@@ -41,6 +41,7 @@ const CATEGORY_OPTIONS = [
   'milestone',
   'special',
   'seasonal',
+  'achievement',
 ] as const;
 
 const COLORS = {
