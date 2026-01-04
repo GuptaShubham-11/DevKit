@@ -130,3 +130,16 @@ export type TooltipProps = {
     [key: string]: any;
   };
 };
+
+// Badge Card Props
+export type BadgeCardProps = {
+  badge: Badge;
+  index: number;
+};
+
+// Menu Dropdown Props
+export type MenuDropdownProps = {
+  handleEdit: () => void;
+  handleView: () => void;
+  handleDelete: () => void;
+};
