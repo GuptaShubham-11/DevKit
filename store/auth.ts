@@ -1,117 +1,20 @@
+import axios from 'axios';
 import { toast } from 'sonner';
 import { create } from 'zustand';
-import axios, { AxiosError } from 'axios';
-import { User } from '@/types/shared/user';
-import { signIn, SignInResponse, signOut } from 'next-auth/react';
+import { signIn, signOut } from 'next-auth/react';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
-
-interface UsernameCheck {
-  message: string;
-  available: boolean;
-}
-
-interface LoadingState {
-  logout: boolean;
-  logging: boolean;
-  registering: boolean;
-  verifyingOtp: boolean;
-  requestingOtp: boolean;
-  resettingPassword: boolean;
-  checkingUsername: boolean;
-  suggestingUsernames: boolean;
-}
-
-interface ErrorState {
-  login: string | null;
-  logout: string | null;
-  register: string | null;
-  verifyOtp: string | null;
-  requestOtp: string | null;
-  resetPassword: string | null;
-  checkUsername: string | null;
-  suggestUsername: string | null;
-}
-
-interface AuthActions {
-  // Authentication
-  login: (email: string, password: string) => Promise<SignInResponse | null>;
-  logout: () => Promise<boolean>;
-  register: (
-    username: string,
-    email: string,
-    password: string
-  ) => Promise<boolean>;
-  verifyOtp: (email: string, otp: string) => Promise<boolean>;
-
-  // Password Reset
-  requestOtp: (
-    email: string,
-    type: 'register' | 'resetPassword'
-  ) => Promise<boolean>;
-  resetPassword: (
-    email: string,
-    otp: string,
-    newPassword: string
-  ) => Promise<boolean>;
-
-  // Username Management
-  checkUsername: (username: string) => Promise<UsernameCheck | null>;
-  suggestUsernames: () => Promise<string[]>;
-
-  // State Management
-  setUser: (user: User | null) => void;
-  clearErrors: () => void;
-  clearUsernameCheck: () => void;
-  clearSuggestedUsernames: () => void;
-  reset: () => void;
-}
-
-interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-  suggestedUsernames: string[];
-  usernameCheck: UsernameCheck | null;
-  loading: LoadingState;
-  errors: ErrorState;
-  actions: AuthActions;
-}
-
-const createInitialLoading = (): LoadingState => ({
-  logout: false,
-  logging: false,
-  registering: false,
-  verifyingOtp: false,
-  requestingOtp: false,
-  resettingPassword: false,
-  checkingUsername: false,
-  suggestingUsernames: false,
-});
-
-const createInitialErrors = (): ErrorState => ({
-  login: null,
-  logout: null,
-  register: null,
-  verifyOtp: null,
-  requestOtp: null,
-  resetPassword: null,
-  checkUsername: null,
-  suggestUsername: null,
-});
-
-const normalize = (value: string) => value.trim().toLowerCase();
-
-const getAxiosErrorMessage = (error: unknown, fallback: string): string => {
-  if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError<{ error?: string }>;
-    return axiosError.response?.data?.error || fallback;
-  }
-
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
-  return fallback;
-};
+import { getAxiosErrorMessage } from '@/lib/small-utils/store/common';
+import {
+  AuthState,
+  ErrorState,
+  LoadingState,
+  UsernameCheck,
+} from '@/types/small-types/store/auth';
+import {
+  createInitialErrors,
+  createInitialLoading,
+  normalize,
+} from '@/lib/small-utils/store/auth';
 
 const useAuthStore = create<AuthState>()(
   devtools(
@@ -562,11 +465,11 @@ export const useSuggestUsernameError = () =>
 // Computed selectors
 export const useUserProfile = () => useAuthStore((state) => state.user);
 export const useUserEmail = () => useAuthStore((state) => state.user?.email);
-export const useUsername = () => useAuthStore((state) => state.user?.username);
-export const useIsAdmin = () =>
-  useAuthStore((state) => state.user?.isAdmin === true);
-export const useIsVerified = () =>
-  useAuthStore((state) => state.user?.isVerified ?? false);
+// export const useUsername = () => useAuthStore((state) => state.user?.username);
+// export const useIsAdmin = () =>
+//   useAuthStore((state) => state.user?.isAdmin === true);
+// export const useIsVerified = () =>
+//   useAuthStore((state) => state.user?.isVerified ?? false);
 
 // Username availability selectors
 export const useUsernameMessage = () =>
