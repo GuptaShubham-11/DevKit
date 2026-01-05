@@ -1,21 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { Category as SharedCategory } from '@/types/shared/category';
 
-export interface ICategory extends Document {
+export interface ICategory extends Document, Omit<SharedCategory, '_id'> {
   _id: mongoose.Types.ObjectId;
-  name: string;
-  description?: string;
-  slug: string;
-  parentId?: mongoose.Types.ObjectId;
-  icon?: string;
-  sortOrder: number;
-  isActive: boolean;
-  color: string;
-  featuredTemplates: mongoose.Types.ObjectId[];
-  clickCount: number;
-  metadata: Record<string, any>;
-  templateCount: number;
-  createdAt: Date;
-  updatedAt: Date;
 }
 
 const categorySchema = new Schema<ICategory>(
