@@ -1,183 +1,27 @@
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { toast } from 'sonner';
 import { create } from 'zustand';
 import { Badge } from '@/types/shared/badge';
 import { devtools, subscribeWithSelector } from 'zustand/middleware';
-
-interface Loading {
-  fetching: boolean;
-  creating: boolean;
-  updating: boolean;
-  deleting: boolean;
-  loadingMore: boolean;
-}
-
-interface ErrorState {
-  fetch: string | null;
-  create: string | null;
-  update: string | null;
-  delete: string | null;
-  loadMore: string | null;
-}
-
-interface Pagination {
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-  totalPages: number;
-  currentPage: number;
-}
-
-interface Stats {
-  totalBadges: number;
-  activeBadges: number;
-  inactiveBadges: number;
-  totalEarnedBy: number;
-  categories: Array<{
-    _id: string;
-    count: number;
-    rarities: string[];
-  }>;
-  rarityDistribution: Array<{
-    _id: string;
-    count: number;
-  }>;
-  averageXpBonus: number;
-}
-
-export type BadgeCategory =
-  | 'creator'
-  | 'community'
-  | 'usage'
-  | 'milestone'
-  | 'special'
-  | 'seasonal'
-  | 'achievement';
-
-export type BadgeRarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary';
-
-export interface Query {
-  category?: BadgeCategory;
-  rarity?: BadgeRarity;
-  search?: string;
-  includeInactive: boolean;
-  sort: 'name' | 'createdAt' | 'rarity' | 'category' | 'earnedBy';
-  order: 'asc' | 'desc';
-  limit: number;
-  offset: number;
-  includeStats: boolean;
-}
-
-interface BadgeActions {
-  fetchBadges: (query?: Partial<Query>) => Promise<void>;
-  loadMoreBadges: () => Promise<void>;
-  refreshBadges: () => Promise<void>;
-
-  createBadge: (data: Partial<Badge>) => Promise<Badge | null>;
-  updateBadge: (id: string, data: Partial<Badge>) => Promise<Badge | null>;
-  deleteBadge: (id: string) => Promise<boolean>;
-
-  setQuery: (query: Partial<Query>) => void;
-  resetQuery: () => void;
-
-  clearErrors: () => void;
-  reset: () => void;
-
-  getActiveBadges: () => Badge[];
-  searchBadges: (searchTerm: string) => Badge[];
-  getBadgesByRarity: (rarity: BadgeRarity) => Badge[];
-  getBadgeById: (id: string) => Badge | undefined;
-  getBadgesByCategory: (category: BadgeCategory) => Badge[];
-}
-
-interface BadgeState {
-  badges: Badge[];
-  badgeMap: Map<string, Badge>;
-  badgesByCategory: Map<string, Badge[]>;
-  badgesByRarity: Map<string, Badge[]>;
-  featuredBadges: Badge[];
-  stats: Stats | null;
-  pagination: Pagination | null;
-  loading: Loading;
-  errors: ErrorState;
-  query: Query;
-  actions: BadgeActions;
-}
-
-const DEFAULT_QUERY: Query = {
-  includeInactive: false,
-  sort: 'createdAt',
-  order: 'desc',
-  limit: 20,
-  offset: 0,
-  includeStats: false,
-};
-
-const createInitialLoading = (): Loading => ({
-  fetching: false,
-  creating: false,
-  updating: false,
-  deleting: false,
-  loadingMore: false,
-});
-
-const createInitialErrors = (): ErrorState => ({
-  fetch: null,
-  create: null,
-  update: null,
-  delete: null,
-  loadMore: null,
-});
-
-const getAxiosErrorMessage = (error: unknown, fallback: string): string => {
-  if (axios.isAxiosError(error)) {
-    const axiosError = error as AxiosError<{ error?: string }>;
-    return axiosError.response?.data?.error || fallback;
-  }
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-  return fallback;
-};
-
-const buildBadgeMap = (badges: Badge[]): Map<string, Badge> =>
-  new Map(badges.map((badge) => [badge._id, badge]));
-
-const buildBadgesByCategory = (badges: Badge[]): Map<string, Badge[]> => {
-  const categoryMap = new Map<string, Badge[]>();
-
-  badges.forEach((badge) => {
-    const category = badge.category || 'uncategorized';
-    const list = categoryMap.get(category) ?? [];
-    list.push(badge);
-    categoryMap.set(category, list);
-  });
-
-  return categoryMap;
-};
-
-const buildBadgesByRarity = (badges: Badge[]): Map<string, Badge[]> => {
-  const rarityMap = new Map<string, Badge[]>();
-
-  badges.forEach((badge) => {
-    const list = rarityMap.get(badge.rarityLevel) ?? [];
-    list.push(badge);
-    rarityMap.set(badge.rarityLevel, list);
-  });
-
-  return rarityMap;
-};
-
-const buildQueryParams = (query: Query | Partial<Query>): string => {
-  const params = new URLSearchParams();
-  Object.entries(query).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      params.append(key, String(value));
-    }
-  });
-  return params.toString();
-};
+import { ErrorState, Loading } from '@/types/small-types/store/common';
+import {
+  BadgeCategory,
+  BadgeRarity,
+  BadgeState,
+  Query,
+} from '@/types/small-types/store/badge';
+import {
+  createInitialErrors,
+  createInitialLoading,
+  getAxiosErrorMessage,
+} from '@/lib/small-utils/store/common';
+import {
+  buildBadgeMap,
+  buildBadgesByCategory,
+  buildBadgesByRarity,
+  buildQueryParams,
+  DEFAULT_QUERY,
+} from '@/lib/small-utils/store/badge';
 
 const useBadgeStore = create<BadgeState>()(
   devtools(
