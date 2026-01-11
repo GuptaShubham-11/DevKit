@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
     }
 
     const {
+      order,
+      sort,
+      search,
       parentId,
       includeInactive = false,
       limit = 50,
@@ -27,29 +30,45 @@ export async function GET(request: NextRequest) {
     await connectToDatabase();
 
     // Build query conditions
-    const conditions: {
-      parentId?: string;
-      isActive?: boolean;
-    } = {};
+    const conditions: any = {};
 
-    if (parentId) {
-      conditions.parentId = parentId;
+    if (parentId) conditions.parentId = parentId;
+    if (!includeInactive) conditions.isActive = true;
+    if (search) {
+      conditions.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } },
+      ];
     }
 
-    if (!includeInactive) {
-      conditions.isActive = true;
+    const sortObject: any = {};
+
+    switch (sort) {
+      case 'name':
+        sortObject.name = order === 'asc' ? 1 : -1;
+        break;
+      case 'createdAt':
+        sortObject.createdAt = order === 'asc' ? 1 : -1;
+        break;
+      case 'clickCount':
+        sortObject.clickCount = order === 'asc' ? 1 : -1;
+        break;
+      case 'templateCount':
+        sortObject.templateCount = order === 'asc' ? 1 : -1;
+        break;
+      default:
+        sortObject.createdAt = order === 'asc' ? 1 : -1;
+        break;
     }
 
     // Execute query with population
     let query = Category.find(conditions)
-      .sort({ sortOrder: 1, name: 1 })
+      .sort({ sortOrder: 1, ...sortObject })
       .limit(limit)
       .skip(offset);
 
     // Populate parent category if needed
-    if (!parentId) {
-      query = query.populate('parentId', 'name slug');
-    }
+    if (parentId) query = query.populate('parentId', 'name slug');
 
     const categories = (await query.exec()) as ICategory[];
 
@@ -58,11 +77,8 @@ export async function GET(request: NextRequest) {
 
     // Build hierarchical structure if no parentId specified
     let result;
-    if (!parentId) {
-      result = buildCategoryTree(categories);
-    } else {
-      result = categories;
-    }
+    if (!parentId) result = buildCategoryTree(categories);
+    else result = categories;
 
     return NextResponse.json(
       {
@@ -77,9 +93,9 @@ export async function GET(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    // console.error('Error fetching categories:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch categories' },
+      { error: 'Failed to fetch categories', details: error },
       { status: 500 }
     );
   }
