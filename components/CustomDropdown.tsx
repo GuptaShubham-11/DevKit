@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import type { FieldError } from 'react-hook-form';
-import type { SelectItem as DropdownOption } from '@/types/small-types/badge';
 
 import {
   FormItem,
@@ -18,6 +17,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import Icon from './Icon';
+
+// Select item props
+export type DropdownOption = {
+  value: string;
+  label: string;
+  icon?: string;
+  color?: string;
+}[];
 
 interface CustomDropdownProps {
   field: {
@@ -135,9 +143,10 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 <div className="flex min-w-0 w-full items-center gap-3">
                   {option.icon && (
                     <span className="flex-shrink-0">
-                      <option.icon
-                        size={18}
-                        className={iconColor(option.value)}
+                      <Icon
+                        name={option.icon}
+                        className={`${iconColor(option.value)} size-4`}
+                        style={{ color: `${option.color}` }}
                       />
                     </span>
                   )}
