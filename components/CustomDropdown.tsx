@@ -63,8 +63,6 @@ export const CustomDropdown: React.FC<CustomDropdownProps> = ({
   const iconColor = (value: string): string =>
     getIconColor?.(value)?.text ?? '';
 
-  console.log('optionsss', options[0].icon);
-
   return (
     <FormItem className={`w-full ${className}`}>
       {label && (
