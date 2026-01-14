@@ -1,33 +1,9 @@
 import { Step } from '@/components/StepIndicator';
-import {
-  Activity,
-  BarChart3,
-  BetweenVerticalEnd,
-  Calendar,
-  Circle,
-  Clock,
-  Command,
-  Copy,
-  CreativeCommons,
-  Crown,
-  Gem,
-  Hourglass,
-  Infinity,
-  LayoutTemplate,
-  Medal,
-  Milestone,
-  Star,
-  Target,
-  ThumbsUp,
-  TrendingUp,
-  Trophy,
-  UserRoundPlusIcon,
-  Users,
-  Watch,
-} from 'lucide-react';
-import { ColorBasedOnKeyword, SelectItem } from '@/types/small-types/badge';
-import { Query } from '@/store/badge';
+import { CreativeCommons, Crown, Gem, Star } from 'lucide-react';
+import { ColorBasedOnKeyword } from '@/types/small-types/badge';
 import { FilterGroup } from '@/types/small-types/searchBar';
+import { Query } from '@/types/small-types/store/badge';
+import { DropdownOption } from '@/components/CustomDropdown';
 
 export const steps: Step[] = [
   {
@@ -47,110 +23,110 @@ export const steps: Step[] = [
   },
 ];
 
-export const categoryOptions: SelectItem = [
+export const categoryOptions: DropdownOption = [
   {
     value: 'creator',
     label: 'Creator',
-    icon: UserRoundPlusIcon,
+    icon: 'UserRoundPlusIcon',
   },
   {
     value: 'usage',
     label: 'Usage',
-    icon: Activity,
+    icon: 'Activity',
   },
   {
     value: 'milestone',
     label: 'Milestone',
-    icon: Milestone,
+    icon: 'Milestone',
   },
   {
     value: 'special',
     label: 'Special',
-    icon: Star,
+    icon: 'Star',
   },
   {
     value: 'community',
     label: 'Community',
-    icon: Users,
+    icon: 'Users',
   },
   {
     value: 'seasonal',
     label: 'Seasonal',
-    icon: Calendar,
+    icon: 'Calendar',
   },
   {
     value: 'achievement',
     label: 'Achievement',
-    icon: Medal,
+    icon: 'Medal',
   },
 ];
 
-export const conditionOptions: SelectItem = [
+export const conditionOptions: DropdownOption = [
   {
     value: 'lte',
     label: 'At most',
-    icon: BarChart3,
+    icon: 'BarChart3',
   },
   {
     value: 'gte',
     label: 'At least',
-    icon: TrendingUp,
+    icon: 'TrendingUp',
   },
   {
     value: 'eq',
     label: 'Exactly',
-    icon: Target,
+    icon: 'Target',
   },
   {
     value: 'between',
     label: 'Between',
-    icon: BetweenVerticalEnd,
+    icon: 'BetweenVerticalEnd',
   },
 ];
 
-export const timeframeOptions: SelectItem = [
+export const timeframeOptions: DropdownOption = [
   {
     value: 'allTime',
     label: 'All Time',
-    icon: Infinity,
+    icon: 'Infinity',
   },
   {
     value: '30Days',
     label: '30 Days',
-    icon: Clock,
+    icon: 'Clock',
   },
   {
     value: '7Days',
     label: '1 Week',
-    icon: Watch,
+    icon: 'Watch',
   },
   {
     value: '1Day',
     label: '24 Hours',
-    icon: Hourglass,
+    icon: 'Hourglass',
   },
 ];
 
-export const rarityOptions: SelectItem = [
+export const rarityOptions: DropdownOption = [
   {
     value: 'common',
     label: 'Common',
-    icon: Circle,
+    icon: 'Circle',
   },
   {
     value: 'rare',
     label: 'Rare',
-    icon: Gem,
+    icon: 'Gem',
   },
   {
     value: 'epic',
     label: 'Epic',
-    icon: Trophy,
+    icon: 'Trophy',
   },
   {
     value: 'legendary',
     label: 'Legendary',
-    icon: Crown,
+    icon: 'Crown',
   },
 ];
 
@@ -340,31 +316,31 @@ export const categoryColor = (category: string): ColorBasedOnKeyword => {
   }
 };
 
-export const criteriaTypeOptions: SelectItem = [
+export const criteriaTypeOptions: DropdownOption = [
   {
     value: 'templatesCreated',
     label: 'Templates',
-    icon: LayoutTemplate,
+    icon: 'LayoutTemplate',
   },
   {
     value: 'copiesReceived',
     label: 'Copies',
-    icon: Copy,
+    icon: 'Copy',
   },
   {
     value: 'commandsGenerated',
     label: 'Commands',
-    icon: Command,
+    icon: 'Command',
   },
   {
     value: 'likesReceived',
     label: 'Likes',
-    icon: ThumbsUp,
+    icon: 'ThumbsUp',
   },
   {
     value: 'communityHelper',
     label: 'Community',
-    icon: Users,
+    icon: 'Users',
   },
 ];
 
