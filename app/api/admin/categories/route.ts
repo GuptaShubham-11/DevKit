@@ -1,10 +1,10 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { User } from '@/models/user';
 import { NextRequest, NextResponse } from 'next/server';
 import { Category, ICategory } from '@/models/category';
 import { connectToDatabase } from '@/lib/db';
 import { createCategorySchema } from '@/validation/category';
+import { checkUserIsAdmin } from '@/lib/checkUserIsAdmin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +16,8 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       );
     }
+
+    await connectToDatabase();
 
     // Check if user is admin
     const isAdmin = await checkUserIsAdmin(session.user.id);
@@ -36,14 +38,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, description, slug, parentId, icon, sortOrder, metadata } =
+    const { name, description, slug, parentId, icon, sortOrder, metadata,
+      color, featuredTemplates, templateCount, clickCount, isActive } =
       validatedData.data;
-
-    await connectToDatabase();
 
     // Check if slug already exists
     const existingCategory = (await Category.findOne({
-      slug: slug || generateSlug(name),
+      slug,
     })) as ICategory;
 
     if (existingCategory) {
@@ -67,43 +68,35 @@ export async function POST(request: NextRequest) {
     const newCategory = (await Category.create({
       name,
       description,
-      slug: slug || generateSlug(name),
+      slug,
       parentId: parentId || null,
       icon,
       sortOrder: sortOrder || 0,
       metadata: metadata || {},
+      color,
+      featuredTemplates,
+      templateCount,
+      clickCount,
+      isActive
     })) as ICategory;
 
     if (parentId) {
       // Populate parent data for response
-      await newCategory.populate('parentId', 'name slug');
+      await newCategory.populate('parentId', 'name');
     }
 
     return NextResponse.json(
       {
-        message: 'Category created successfully',
+        message: 'Category created successfully.',
         category: newCategory,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error creating category:', error);
+    // console.error('Error creating category:', error);
     return NextResponse.json(
-      { error: 'Failed to create category' },
+      { error: 'Failed to create category', details: error },
       { status: 500 }
     );
   }
-}
-
-// Helper functions
-function generateSlug(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
-
-async function checkUserIsAdmin(userId: string): Promise<boolean> {
-  const user = await User.findById(userId);
-  return user.isAdmin || false;
 }

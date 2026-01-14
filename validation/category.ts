@@ -42,6 +42,7 @@ export const updateCategorySchema = createCategorySchema.partial();
 export const getCategoriesSchema = z.object({
   parentId: z.string().nullable().optional(),
   search: z.string().max(100).optional(),
+  treeStructure: z.enum(['true', 'false']).default('false'),
   sort: z
     .enum(['name', 'createdAt', 'clickCount', 'templateCount'])
     .default('createdAt')
