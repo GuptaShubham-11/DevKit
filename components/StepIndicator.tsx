@@ -1,8 +1,6 @@
 import { motion } from 'framer-motion';
 import { ChevronRight, SquareCheckBig } from 'lucide-react';
-
 import Icon from './Icon';
-import { getStatusStyles, getStepStatus } from '@/lib/smallUtils';
 
 type StepStatus = 'completed' | 'current' | 'pending' | 'error' | 'optional';
 type StepVariant = 'linear' | 'compact' | 'breadcrumb';
@@ -40,13 +38,62 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
   const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
   const currentStepData = steps[currentStep - 1];
 
-  //  step-by-step indicator with connections
+  const stepStatus = (stepId: number, currentStep: number): StepStatus => {
+    if (stepId < currentStep) return 'completed';
+    if (stepId === currentStep) return 'current';
+    return 'pending';
+  };
+
+  const statusStyles = (
+    status: StepStatus
+  ): { bg: string; border: string; text: string; icon?: string } => {
+    switch (status) {
+      case 'completed':
+        return {
+          bg: 'bg-accent-success',
+          border: 'border-accent-success',
+          text: 'text-text-primary',
+          icon: 'Check',
+        };
+      case 'current':
+        return {
+          bg: 'bg-border-color',
+          border: 'border-accent-success',
+          text: 'text-text-primary',
+        };
+      case 'pending':
+        return {
+          bg: 'bg-border-color',
+          border: 'border-border-color',
+          text: 'text-text-secondary',
+        };
+      case 'error':
+        return {
+          bg: 'bg-error',
+          border: 'border-error',
+          text: 'text-error',
+          icon: 'AlertCircle',
+        };
+      case 'optional':
+        return {
+          bg: 'bg-border-color',
+          border: 'border-border-color',
+          text: 'text-text-primary',
+        };
+      default:
+        return {
+          bg: 'bg-border-color',
+          border: 'border-border-color',
+          text: 'text-text-primary',
+        };
+    }
+  };
   const Stepper = () => (
     <div className="hidden w-full flex-col sm:flex">
       <div className="mb-4 flex items-center justify-between">
         {steps.map((step, index) => {
-          const status = getStepStatus(step.id, currentStep);
-          const style = getStatusStyles(status);
+          const status = stepStatus(step.id, currentStep);
+          const style = statusStyles(status);
           const isClickable = allowClickNavigation && status !== 'pending';
           const isLast = index === steps.length - 1;
 
@@ -69,7 +116,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
                   ${isClickable ? 'cursor-pointer' : 'cursor-default'}
                 `}
               >
-                {status === 'completed' && (
+                {status === 'completed' && style.icon && (
                   <motion.div
                     initial={false}
                     animate={{ scale: 1 }}
@@ -79,7 +126,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
                   </motion.div>
                 )}
 
-                {status === 'error' && (
+                {status === 'error' && style.icon && (
                   <motion.div
                     animate={{ rotate: [0, -5, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 2 }}
@@ -165,7 +212,7 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
       aria-label="Step navigation"
     >
       {steps.map((step, index) => {
-        const status = getStepStatus(step.id, currentStep);
+        const status = stepStatus(step.id, currentStep);
         const isClickable = allowClickNavigation && status !== 'pending';
         const isLast = index === steps.length - 1;
 
