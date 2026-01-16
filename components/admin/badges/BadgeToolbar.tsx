@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Award, Menu, Plus, SmilePlus, Trophy } from 'lucide-react';
+import { Menu, SmilePlus, Trophy } from 'lucide-react';
 
 import AwardBadgeDialog from './AwardBadgeDialog';
 import CreateBadgeDialog from './CreateBadgeDialog';
@@ -19,7 +19,7 @@ import {
   defaultQueryConvertIntoStringPair,
 } from '@/lib/small-utils/badge';
 
-import type { Query } from '@/store/badge';
+import type { Query } from '@/types/small-types/store/badge';
 import type { SearchFilters } from '@/types/small-types/searchBar';
 
 export function BadgeToolbar() {
