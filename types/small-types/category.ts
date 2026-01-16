@@ -15,3 +15,10 @@ export type CategoryDialogProps = {
 export interface FormCategoryProps<T extends FieldValues = CategoryFormType> {
   form: UseFormReturn<T>;
 }
+
+//  Footer Category dialog props
+export type FooterCategoryDialogProps = {
+  loading: boolean;
+  isFormValid: boolean;
+  handleClose: (isOpen: boolean) => void;
+};
