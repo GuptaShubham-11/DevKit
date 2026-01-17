@@ -5,7 +5,7 @@ export const DEFAULT_QUERY: Query = {
   includeInactive: false,
   sort: 'createdAt',
   order: 'asc',
-  limit: 2,
+  limit: 20,
   offset: 0,
   includeStats: true,
   treeStructure: 'false',
