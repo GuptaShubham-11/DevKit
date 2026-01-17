@@ -22,3 +22,10 @@ export type FooterCategoryDialogProps = {
   isFormValid: boolean;
   handleClose: (isOpen: boolean) => void;
 };
+
+// Color based on keyword
+export type ColorBasedOnKeyword = {
+  bg: string;
+  color?: string;
+  text: string;
+};
