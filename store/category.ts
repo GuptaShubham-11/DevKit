@@ -43,6 +43,7 @@ const useCategoryStore = create<CategoryState>()(
         categories: [],
         categoryMap: new Map(),
         stats: null,
+        charts: null,
         pagination: null,
         loading: createInitialLoading(),
         errors: createInitialErrors(),
@@ -59,13 +60,16 @@ const useCategoryStore = create<CategoryState>()(
               const response = await axios.get(
                 `/api/categories?${queryString}`
               );
-              const { categories, pagination, stats } = response.data;
+              console.log(response);
+
+              const { categories, pagination, stats, charts } = response.data;
 
               set((state) => ({
                 categories,
                 categoryMap: buildCategoryMap(categories),
                 pagination,
                 stats: stats ?? state.stats,
+                charts,
               }));
             } catch (error) {
               const errorMessage = getAxiosErrorMessage(
@@ -268,6 +272,7 @@ const useCategoryStore = create<CategoryState>()(
               categories: [],
               categoryMap: new Map(),
               stats: null,
+              charts: null,
               pagination: null,
               query: DEFAULT_QUERY,
               loading: createInitialLoading(),
@@ -337,3 +342,4 @@ export const useCategoryPagination = () =>
 export const useReset = () => useCategoryStore((state) => state.actions.reset);
 export const useClearErrors = () =>
   useCategoryStore((state) => state.actions.clearErrors);
+export const useCharts = () => useCategoryStore((state) => state.charts);
