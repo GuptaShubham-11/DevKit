@@ -29,3 +29,8 @@ export type ColorBasedOnKeyword = {
   color?: string;
   text: string;
 };
+
+export type ChartProps = {
+  data: any[];
+  show: 'templates' | 'clicks';
+};
