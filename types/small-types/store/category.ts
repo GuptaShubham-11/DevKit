@@ -16,10 +16,10 @@ export type Query = {
 
 export type Stats = {
   totalCategories: number;
-  activeCategories: number;
+  totalActive: number;
+  totalInactive: number;
   totalTemplates: number;
-  totalClicks: number;
-  avgSortOrder: number;
+  totalClickCount: number;
 };
 
 export type CategoryActions = {
@@ -41,10 +41,34 @@ export type CategoryActions = {
   getCategoryById: (id: string) => Category | undefined;
 };
 
+export type Chart = {
+  _id: string;
+  name: string;
+  icon: string;
+  color: string;
+  templateCount?: number;
+  clickCount?: number;
+};
+
+export type Charts = {
+  topByTemplates: Chart[];
+  topByClicks: Chart[];
+  totalClickCount: any;
+};
+
+// Tooltip Props
+export type TooltipProps = {
+  active?: boolean;
+  payload?: {
+    [key: string]: any;
+  };
+};
+
 export interface CategoryState {
   categories: Category[];
   categoryMap: Map<string, Category>;
   stats: Stats | null;
+  charts: Charts | null;
   pagination: Pagination | null;
   loading: Loading;
   errors: ErrorState;
