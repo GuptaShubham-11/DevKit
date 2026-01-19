@@ -88,6 +88,7 @@ export const FormCategory = <T extends FieldValues = CategoryFormType>({
                 iconLeft={ListOrdered}
                 error={fieldState.error?.message}
                 {...field}
+                onChange={(e) => field.onChange(Number(e.target.value))}
               />
             </FormItem>
           )}
