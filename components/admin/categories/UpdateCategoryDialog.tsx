@@ -26,15 +26,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-interface UpdateCategoryDialogProps extends CategoryDialogProps {
-  category: NonNullable<CategoryDialogProps['category']>;
-}
-
-export default function UpdateCategoryDialog({
+export const UpdateCategoryDialog: React.FC<CategoryDialogProps> = ({
   open,
   onOpenChange,
   category,
-}: UpdateCategoryDialogProps) {
+}) => {
   const updateCategory = useUpdateCategory();
   const generateSlug = useGenerateSlug();
   const loading = useUpdateLoading();
@@ -94,6 +90,8 @@ export default function UpdateCategoryDialog({
   }, [name, category?.slug, form, generateSlug]);
 
   const handleSubmit = async (data: UpdateCategory) => {
+    if (!category) return;
+
     try {
       const payload = {
         ...data,
@@ -154,4 +152,4 @@ export default function UpdateCategoryDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};
