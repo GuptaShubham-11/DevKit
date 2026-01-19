@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
       sort,
       search,
       parentId,
+      treeStructure = 'false',
       includeInactive = false,
       limit = 50,
       offset = 0,
@@ -72,12 +73,53 @@ export async function GET(request: NextRequest) {
 
     const categories = (await query.exec()) as ICategory[];
 
-    // Get total count for pagination
-    const total = await Category.countDocuments(conditions);
+    // Get stats
+    const total = await Category.countDocuments();
+    const totalActive = await Category.countDocuments({
+      isActive: true,
+    });
+
+    const [charts] = await Category.aggregate([
+      { $match: conditions },
+      {
+        $facet: {
+          topByTemplates: [
+            { $sort: { templateCount: -1 } },
+            { $limit: 5 },
+            {
+              $project: {
+                name: 1,
+                templateCount: 1,
+                color: 1,
+                icon: 1,
+              },
+            },
+          ],
+
+          topByClicks: [
+            { $sort: { clickCount: -1 } },
+            { $limit: 5 },
+            {
+              $project: {
+                name: 1,
+                clickCount: 1,
+                color: 1,
+                icon: 1,
+              },
+            },
+          ],
+
+          totalClickCount: [
+            { $group: { _id: null, totalClickCount: { $sum: '$clickCount' } } },
+          ],
+        },
+      },
+    ]);
 
     // Build hierarchical structure if no parentId specified
     let result;
-    if (!parentId) result = buildCategoryTree(categories);
+    if (!parentId && treeStructure === 'true')
+      result = buildCategoryTree(categories);
     else result = categories;
 
     return NextResponse.json(
@@ -89,6 +131,13 @@ export async function GET(request: NextRequest) {
           offset,
           hasMore: offset + limit < total,
         },
+        stats: {
+          totalCategories: total,
+          totalActive,
+          totalInactive: total - totalActive,
+          totalClickCount: charts?.totalClickCount[0]?.totalClickCount || 0,
+        },
+        charts,
       },
       { status: 200 }
     );
