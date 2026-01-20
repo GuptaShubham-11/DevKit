@@ -1,23 +1,25 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { User } from '@/models/user';
 import { NextRequest, NextResponse } from 'next/server';
-import { Category, ICategory } from '@/models/category';
+import { Category } from '@/models/category';
 import { connectToDatabase } from '@/lib/db';
 import { createCategorySchema } from '@/validation/category';
+import { checkUserIsAdmin } from '@/lib/checkUserIsAdmin';
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
 
-    if (!session) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Authentication required' },
         { status: 401 }
       );
     }
 
-    // Check if user is admin
+    await connectToDatabase();
+
+    // Check admin permissions
     const isAdmin = await checkUserIsAdmin(session.user.id);
     if (!isAdmin) {
       return NextResponse.json(
@@ -36,27 +38,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, description, slug, parentId, icon, sortOrder, metadata } =
-      validatedData.data;
+    const {
+      name,
+      description,
+      slug,
+      parentId,
+      icon,
+      sortOrder,
+      metadata,
+      color,
+      isActive,
+      featuredTemplates,
+      clickCount,
+      templateCount,
+    } = validatedData.data;
 
-    await connectToDatabase();
+    // Generate slug if not provided
+    const finalSlug = slug || generateSlug(name);
 
-    // Check if slug already exists
-    const existingCategory = (await Category.findOne({
-      slug: slug || generateSlug(name),
-    })) as ICategory;
-
+    // Check slug uniqueness
+    const existingCategory = await Category.findOne({ slug: finalSlug });
     if (existingCategory) {
       return NextResponse.json(
         { error: 'Category with this slug already exists' },
-        { status: 400 }
+        { status: 409 }
       );
     }
 
-    // Validate parent category exists if provided
+    // Validate parent exists
     if (parentId) {
-      const parentCategory = (await Category.findById(parentId)) as ICategory;
-      if (!parentCategory) {
+      const parent = await Category.findById(parentId);
+      if (!parent) {
         return NextResponse.json(
           { error: 'Parent category not found' },
           { status: 400 }
@@ -64,19 +76,24 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const newCategory = (await Category.create({
+    // Create category
+    const newCategory = await Category.create({
       name,
-      description,
-      slug: slug || generateSlug(name),
+      description: description || '',
+      slug: finalSlug,
       parentId: parentId || null,
-      icon,
-      sortOrder: sortOrder || 0,
+      icon: icon || 'CircleQuestionMark',
+      sortOrder: sortOrder ?? 0,
       metadata: metadata || {},
-    })) as ICategory;
+      color: color || '#64748b',
+      isActive: isActive ?? true,
+      featuredTemplates: featuredTemplates || [],
+      clickCount: clickCount ?? 0,
+      templateCount: templateCount ?? 0,
+    });
 
     if (parentId) {
-      // Populate parent data for response
-      await newCategory.populate('parentId', 'name slug');
+      await newCategory.populate('parentId', 'name slug color icon');
     }
 
     return NextResponse.json(
@@ -84,26 +101,22 @@ export async function POST(request: NextRequest) {
         message: 'Category created successfully',
         category: newCategory,
       },
-      { status: 200 }
+      { status: 201 }
     );
   } catch (error) {
-    console.error('Error creating category:', error);
+    // console.error('Error creating category:', error);
     return NextResponse.json(
-      { error: 'Failed to create category' },
+      { error: 'Failed to create category', details: error },
       { status: 500 }
     );
   }
 }
 
-// Helper functions
 function generateSlug(name: string): string {
   return name
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)/g, '');
-}
-
-async function checkUserIsAdmin(userId: string): Promise<boolean> {
-  const user = await User.findById(userId);
-  return user.isAdmin || false;
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
