@@ -4,6 +4,7 @@ export interface Category {
   description?: string;
   slug: string;
   parentId?: Category | null;
+  children?: Category[];
   icon?: string;
   sortOrder: number;
   isActive: boolean;
