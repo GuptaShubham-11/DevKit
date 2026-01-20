@@ -309,6 +309,8 @@ export const useUpdateLoading = () =>
   useCategoryStore((state) => state.loading.updating);
 export const useDeleteLoading = () =>
   useCategoryStore((state) => state.loading.deleting);
+export const useLoadMoreLoading = () =>
+  useCategoryStore((state) => state.loading.loadingMore);
 
 // Specific action hooks
 export const useCreateCategory = () =>
