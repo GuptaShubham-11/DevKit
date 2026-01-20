@@ -42,43 +42,46 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    const sortObject: any = {};
-
+    // Build sort object
+    const sortObj: Record<string, 1 | -1> = {};
     switch (sort) {
       case 'name':
-        sortObject.name = order === 'asc' ? 1 : -1;
+        sortObj.name = order === 'asc' ? 1 : -1;
         break;
       case 'createdAt':
-        sortObject.createdAt = order === 'asc' ? 1 : -1;
+        sortObj.createdAt = order === 'asc' ? 1 : -1;
         break;
       case 'clickCount':
-        sortObject.clickCount = order === 'asc' ? 1 : -1;
+        sortObj.clickCount = order === 'asc' ? 1 : -1;
         break;
       case 'templateCount':
-        sortObject.templateCount = order === 'asc' ? 1 : -1;
+        sortObj.templateCount = order === 'asc' ? 1 : -1;
         break;
       default:
-        sortObject.createdAt = order === 'asc' ? 1 : -1;
+        sortObj.createdAt = order === 'asc' ? 1 : -1;
         break;
     }
 
-    // Execute query with population
-    let query = Category.find(conditions)
-      .sort({ sortOrder: 1, ...sortObject })
+    // Main query
+    const query = Category.find(conditions)
+      .sort({ sortOrder: 1, ...sortObj })
       .limit(limit)
       .skip(offset);
 
-    // Populate parent category if needed
-    if (parentId) query = query.populate('parentId', 'name slug');
+    // Populate parent if needed
+    if (parentId) {
+      query.populate('parentId', 'name slug');
+    }
 
-    const categories = (await query.exec()) as ICategory[];
+    const categories = await query.exec();
 
-    // Get stats
-    const total = await Category.countDocuments();
-    const totalActive = await Category.countDocuments({
-      isActive: true,
-    });
+    // Stats
+    const [total, totalActive] = await Promise.all([
+      Category.countDocuments(),
+      Category.countDocuments({ isActive: true }),
+    ]);
 
+    // Charts aggregation
     const [charts] = await Category.aggregate([
       { $match: conditions },
       {
@@ -95,7 +98,6 @@ export async function GET(request: NextRequest) {
               },
             },
           ],
-
           topByClicks: [
             { $sort: { clickCount: -1 } },
             { $limit: 5 },
@@ -108,7 +110,6 @@ export async function GET(request: NextRequest) {
               },
             },
           ],
-
           totalClickCount: [
             { $group: { _id: null, totalClickCount: { $sum: '$clickCount' } } },
           ],
@@ -116,11 +117,11 @@ export async function GET(request: NextRequest) {
       },
     ]);
 
-    // Build hierarchical structure if no parentId specified
-    let result;
-    if (!parentId && treeStructure === 'true')
-      result = buildCategoryTree(categories);
-    else result = categories;
+    // Build tree structure if requested and no parent filter
+    const result =
+      !parentId && treeStructure === 'true'
+        ? buildCategoryTree(categories as ICategory[])
+        : categories;
 
     return NextResponse.json(
       {
@@ -150,23 +151,37 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Helper function to build category tree
-function buildCategoryTree(
-  categories: ICategory[],
-  parentId: string | null = null
-): ICategory[] {
-  const tree: ICategory[] = [];
+// Build hierarchical category tree
+function buildCategoryTree(categories: ICategory[]): any[] {
+  const map = new Map<string, any>();
+  const roots: any[] = [];
 
+  // Create map and populate children
   for (const category of categories) {
-    if (String(category.parentId) === String(parentId)) {
-      const children = buildCategoryTree(categories, category._id.toString());
-      const categoryObj = {
-        ...category.toObject(),
-        children: children.length > 0 ? children : undefined,
-      };
-      tree.push(categoryObj);
+    const obj = category.toObject();
+    const node = { ...obj, children: [] };
+    map.set(obj._id.toString(), node);
+
+    if (obj.parentId) {
+      const parent = map.get(obj.parentId.toString());
+      if (parent) {
+        parent.children.push(node);
+      }
+    } else {
+      roots.push(node);
     }
   }
 
-  return tree;
+  // Clean empty children arrays
+  const clean = (nodes: any[]): any[] =>
+    nodes.map((node) => {
+      if (node.children?.length) {
+        node.children = clean(node.children);
+      } else {
+        delete node.children;
+      }
+      return node;
+    });
+
+  return clean(roots);
 }
