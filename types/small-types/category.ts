@@ -30,7 +30,53 @@ export type ColorBasedOnKeyword = {
   text: string;
 };
 
+// Chart props
 export type ChartProps = {
   data: any[];
   show: 'templates' | 'clicks';
+};
+
+// Category table row props
+export type CategoryRowProps = {
+  category: Category;
+  index: number;
+  expandedCategories: Record<string, boolean>;
+  toggleChildren: (id: string) => void;
+  onUpdate: (category: Category) => void;
+  onDelete: (category: Category) => void;
+};
+
+// Toggle Button Props
+export type ToggleButtonProps = {
+  isExpanded: boolean;
+  onToggle: () => void;
+};
+
+// Action menu props
+export type ActionMenuProps = {
+  category: Category;
+  onUpdate: (category: Category) => void;
+  onDelete: (category: Category) => void;
+};
+
+// Category Preview Prop
+export type CategoryPreviewProps = {
+  category: Category;
+};
+
+// Data cell props
+export type DataCellProps = {
+  value: string | number;
+  muted?: boolean;
+  className?: string;
+};
+
+// Child row props
+export type ChildRowProps = {
+  category: Category;
+  childIndex: number;
+  expandedCategories: Record<string, boolean>;
+  toggleChildren: (id: string) => void;
+  onUpdate: (category: Category) => void;
+  onDelete: (category: Category) => void;
 };
